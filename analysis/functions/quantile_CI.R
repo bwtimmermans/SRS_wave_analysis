@@ -1,4 +1,4 @@
-# source("/home/ben/research/NOC/SRS_wave_analysis/analysis/quantile_CI.R")
+# source("/home/ben/research/NOC/SRS_wave_analysis/analysis/functions/quantile_CI.R")
 #
 # Near-symmetric distribution-free confidence interval for a quantile `q`.
 # Returns indexes into the order statistics.
