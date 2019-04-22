@@ -46,13 +46,13 @@ func_qqplot <- function (x, y, pch = 19, xlab = "x Quantiles", ylab = "y Quantil
             #    "95% confidence bands"), col = c("darkorange", 
             #    "grey", "gray"), lty = c(2, 1, 2), bty = "n", cex = cex.leg)
             legend("topleft", legend = c("1-1 line", "regression line","95% confidence bands"),
-		   col = c("darkorange","grey","grey"), lty = c(2, 1, 2), bty = "n", cex = cex.leg)
+		   col = c("darkorange","grey","grey"), lty = c(2, 1, 2), lwd = c(lwd.reg, lwd.reg, lwd.reg), bty = "n", cex = cex.leg)
         }
         out$regression <- fit
     }
     else if (make.plot) 
         legend("bottomright", legend = c("1-1 line", "95% confidence bands"), 
-            col = c("darkorange", "gray"), lty = c(2, 2), bty = "n", cex = cex.leg)
+            col = c("darkorange", "gray"), lty = c(2, 2), lwd = c(lwd.reg, lwd.reg, lwd.reg), bty = "n", cex = cex.leg)
     out$qdata <- data.frame(x = x, y = yq, lower = yl, upper = yu)
     class(out) <- "qqplot"
     invisible(out)

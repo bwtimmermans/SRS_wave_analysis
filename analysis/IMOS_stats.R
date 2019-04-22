@@ -11,7 +11,7 @@
 # Specify domain.
    lon_range <- 140:240
    lon_mid <- lon_range+0.5
-   lat_range <- 30:60
+   lat_range <- 0:60
    lat_mid <- lat_range+0.5
 
 # ================================================================= #
@@ -20,7 +20,7 @@
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
 
 # Data set selection.
-   data_idx <- 5
+   data_idx <- 4
 
 # File base name.
    nc_sat1 <- paste(vec_datasets[data_idx],"/IMOS_SRS-Surface-Waves_MW_",vec_datasets[data_idx],"_FV02_",sep="")
@@ -32,7 +32,7 @@
 
 # ================================================================= #
 # Set up variables.
-   array_stats <- array(NA,dim=c(length(vec_lat_sat),ncol=length(vec_lon_sat),10,2))
+   array_stats <- array(NA,dim=c(length(vec_lat_sat),ncol=length(vec_lon_sat),12,2))
 
 # Loop over different locations.
    for (lon_idx in 1:length(lon_range)) {
@@ -115,6 +115,7 @@
             mat_nc1_block_first <- matrix(0,nrow=dim(mat_nc1_breaks)[1],ncol=2)
             mat_nc1_block_max <- matrix(0,nrow=dim(mat_nc1_breaks)[1],ncol=2)
             mat_nc1_block_mean <- matrix(0,nrow=dim(mat_nc1_breaks)[1],ncol=2)
+            mat_nc1_block_Q50 <- matrix(0,nrow=dim(mat_nc1_breaks)[1],ncol=2)
             nc1_block_cor <- 0
 
             for (i in 1:dim(mat_nc1_breaks)[1]) {
@@ -122,8 +123,12 @@
                mat_nc1_block_first[i,] <- c( nc1_SHW_KU[CC[1]],nc1_SHW_C[CC[1]] )
                mat_nc1_block_max[i,] <- c( max(nc1_SHW_KU[CC]),max(nc1_SHW_C[CC]) )
                mat_nc1_block_mean[i,] <- c( mean(nc1_SHW_KU[CC]),mean(nc1_SHW_C[CC]) )
+               mat_nc1_block_Q50[i,] <- c( median(nc1_SHW_KU[CC]),median(nc1_SHW_C[CC]) )
                nc1_block_cor[i] <- cor(nc1_SHW_KU[CC],nc1_SHW_C[CC])
             }
+# Q50 for mean and Q50 pass [11,12].
+            array_stats[lat_idx,lon_idx,11,1:2] <- apply(X=mat_nc1_block_mean,MAR=2,median)
+            array_stats[lat_idx,lon_idx,12,1:2] <- apply(X=mat_nc1_block_Q50,MAR=2,median)
 ## Seasonal info.
 #   nc1_month <- sapply(X=nc1_date[vec_nc1_break_mid],FUN=substr,start=6,stop=7)
 #   nc1_ONDJFM <- which(nc1_month == "01" | nc1_month == "02" | nc1_month == "03" | nc1_month == "10" | nc1_month == "11" | nc1_month == "12")
@@ -134,7 +139,7 @@
 
 
 # Create data structure including metadata.
-   array_meta <- list(data_idx=data_idx,data_name=vec_datasets[data_idx],lat=lat_mid,lon=lon_mid,lab_stat=c("raw_counts","pass_counts","mean","variance","Q50","Q75","Q90","Q95","Q99","maxium"))   
+   array_meta <- list(data_idx=data_idx,data_name=vec_datasets[data_idx],lat=lat_mid,lon=lon_mid,lab_stat=c("raw_counts","pass_counts","mean","variance","Q50","Q75","Q90","Q95","Q99","maxium","Q50_mean-pass","Q50_Q50-pass"))
    list_IMOS_stats <- list(array_meta,array_stats)
 # Write out data.
    stats_file <- paste("./test_output/list_",vec_datasets[data_idx],"_stats.Robj",sep="")

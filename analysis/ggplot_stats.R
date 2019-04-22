@@ -11,7 +11,7 @@
 # Read analysis data (amtrix of lists).
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
    #data_path <- paste("./test_output/list_IMOS_stats.Robj",sep="")
-   data_path <- paste("./test_output/list_",vec_datasets[5],"_stats.Robj",sep="")
+   data_path <- paste("./test_output/list_",vec_datasets[4],"_stats.Robj",sep="")
 
 # Matrix to hold datasets.
    attach(data_path[1])
@@ -20,7 +20,7 @@
    lat_mid <- list_IMOS_stats[[1]]$lat
    lon_mid <- list_IMOS_stats[[1]]$lon
    #detach(pos=2)
-   
+
 # array_stats dimensions:
 # 1,2: lat, lon
 # 3: data set index
@@ -36,7 +36,9 @@
 
 # Direct write from array.
 
-   stat_idx <- 8
+# Available statistics.
+#   "raw_counts","pass_counts","mean","variance","Q50","Q75","Q90","Q95","Q99","maxium","Q50_mean-pass","Q50_Q50-pass"
+   stat_idx <- 1
    band_idx <- 1
 
    lab_stat <- list_IMOS_stats[[1]]$lab_stat[stat_idx]
@@ -72,8 +74,8 @@
       col_breaks <- seq(plot_breaks_lo,plot_breaks_hi,500)
       plot_lims <- c(0.95*min(df_plot$plot_stat,na.rm=T),1.05*max(df_plot$plot_stat,na.rm=T))
    } else if ( stat_idx == 3 | stat_idx == 5 ) {
-      col_breaks <- seq(0,4,0.50)
-      plot_lims <- c(0,3.75)
+      col_breaks <- seq(0,3.5,0.50)
+      plot_lims <- c(0,3.5)
    } else if ( stat_idx == 6 ) {
       col_breaks <- seq(2,5,0.5)
       plot_lims <- c(1,5)
@@ -81,8 +83,11 @@
       col_breaks <- seq(2,6,0.5)
       plot_lims <- c(2,6)
    } else if ( stat_idx == 8 ) {
-      col_breaks <- seq(2,7,0.5)
-      plot_lims <- c(2,7)
+      col_breaks <- seq(2,8,0.5)
+      plot_lims <- c(2,8)
+   } else if ( stat_idx == 11 | stat_idx == 12 ) {
+      col_breaks <- seq(0,3.5,0.5)
+      plot_lims <- c(0,3.5)
    }
 
 # Chi plot.

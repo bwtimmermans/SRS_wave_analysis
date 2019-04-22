@@ -16,7 +16,8 @@
 # File base name.
    #IMOS_SRS-Surface-Waves_MW_JASON-1_FV02_052N-205E-DM00.nc
 
-# Buoy 46066, 52.785N 155.047W
+# Buoy 46066, 52.785 N 155.047 W
+# Buoy 51004, 17.604 N 152.364 W
    buoy_list <- c("46066")
 
 #-----------------------------------------------------------------------#
@@ -25,7 +26,7 @@
 
 # Load historical data for NDBC buoys.
    #array_buoy_obs <- array(0,dim=c(100000,16,length(buoy_list)))
-   mat_buoy_obs <- matrix(0,nrow=200000,ncol=16)
+   mat_buoy_obs <- matrix(0,nrow=500000,ncol=16)
    mat_data_dims <- matrix(0,ncol=2,nrow=length(buoy_list))
 # Loop over buoys.
    for (b.idx in 1:length(buoy_list)) {
@@ -67,25 +68,30 @@
 #-----------------------------------------------------------------------#
 # Satellite data.
 #-----------------------------------------------------------------------#
+   fig_file_name <- paste("./figures/",buoy_name,"_5678_annual.png",sep="")
 # Start figures.
    #X11()
-   png(filename = "./figures/46066_5678_annual.png",width=2000,height=2000)
-   par(mfrow=c(2,2),oma=c(1.5,1.5,2,1),mar=c(6.0,7.0,5.0,3),mgp=c(5,2,0))
+   png(filename = fig_file_name,width=2200,height=2200)
+   par(mfrow=c(2,2),oma=c(1.5,1.5,2,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
 
 # Loop over different data sets.
    SHW_KU <- NULL
 
    #for (k in 1:length(vec_datasets) {
    for (k in c(5,6,7,8)) {
+   #for (k in 6) {
       #vec_lat_sat1 <- paste("0",50:55,"N",sep="")
       #vec_lon_sat1 <- paste(200:210,"E",sep="")
+# 46066
       nc1_filename <- paste(vec_datasets[k],"/IMOS_SRS-Surface-Waves_MW_",vec_datasets[k],"_FV02_052N-205E-DM00.nc",sep="")
+# 51004
+      #nc1_filename <- paste(vec_datasets[k],"/IMOS_SRS-Surface-Waves_MW_",vec_datasets[k],"_FV02_017N-202E-DM00.nc",sep="")
 
       nc1 = nc_open(paste(data_path,nc1_filename,sep=""))
    
 # SWH.
       nc1_SHW_KU <- ncvar_get(nc1,"SWH_KU")
-      SHW_KU <- c(SHW_KU,nc1_SHW_KU)
+      #SHW_KU <- c(SHW_KU,nc1_SHW_KU)
       nc1_SHW_C <- ncvar_get(nc1,"SWH_C")
 
 # Load data.
@@ -121,10 +127,10 @@
 
       for (i in 1:dim(mat_nc1_breaks)[1]) {
          CC <- mat_nc1_breaks[i,1]:mat_nc1_breaks[i,2]
-         mat_nc1_block_first[i,] <- c( nc1_SHW_C[CC[1]],nc1_SHW_KU[CC[1]] )
-         mat_nc1_block_max[i,] <- c( max(nc1_SHW_C[CC]),max(nc1_SHW_KU[CC]) )
-         mat_nc1_block_mean[i,] <- c( mean(nc1_SHW_C[CC]),mean(nc1_SHW_KU[CC]) )
-         nc1_block_cor[i] <- cor(nc1_SHW_C[CC],nc1_SHW_KU[CC])
+         mat_nc1_block_first[i,] <- c( nc1_SHW_KU[CC[1]],nc1_SHW_C[CC[1]] )
+         mat_nc1_block_max[i,] <- c( max(nc1_SHW_KU[CC]),max(nc1_SHW_C[CC]) )
+         mat_nc1_block_mean[i,] <- c( mean(nc1_SHW_KU[CC]),mean(nc1_SHW_C[CC]) )
+         nc1_block_cor[i] <- cor(nc1_SHW_KU[CC],nc1_SHW_C[CC])
       }
 # Seasonal info.
       nc1_month <- sapply(X=nc1_date[vec_nc1_break_mid],FUN=substr,start=6,stop=7)
@@ -138,16 +144,19 @@
 
    #X11()
    #qqplot(hist_buoy_hs,mat_nc1_block_mean,xlim=c(0,12),ylim=c(0,12),xlab="Hs at NDBC 46066",ylab="Hs Jason 1",main="Comparison at NDBC 46066")
-   func_qqplot(hist_buoy_hs,SHW_KU,
+   func_qqplot(hist_buoy_hs[which(!is.na(hist_buoy_hs))],nc1_SHW_KU,
+   #func_qqplot(hist_buoy_hs[which(!is.na(hist_buoy_hs))],mat_nc1_block_mean[,1],
           #xlim=c(0,12),ylim=c(0,12),
           xlim=c(0,4),ylim=c(0,4),regress = FALSE,
           xlab="Buoy",ylab="Satellite",
-          main=paste(vec_datasets[k],": QQ at NDBC 46066",sep=""),cex.main=3.0,cex.lab=3.0,cex.axis=3.0,lwd.reg=5.0)
+          main=paste(vec_datasets[k],": QQ at NDBC ",buoy_name,sep=""),cex.main=3.0,cex.lab=3.0,cex.axis=3.0,lwd.reg=5.0)
 # Quantiles.
    for (kk in 1:2) {
-      segments(x0=q_plot[kk], y0=0, x1=q_plot[kk], y1=q_plot[kk], lty=3, lwd=3, col="red")
-      segments(x0=0, y0=q_plot[kk], x1=q_plot[kk], y1=q_plot[kk], lty=3, lwd=3, col="red")
+      segments(x0=q_plot[kk], y0=0, x1=q_plot[kk], y1=q_plot[kk], lty=3, lwd=3, col="blue")
+      segments(x0=0, y0=q_plot[kk], x1=q_plot[kk], y1=q_plot[kk], lty=3, lwd=3, col="blue")
    }
+   mtext(text = paste("Q50 =",q_plot[1],"m"), side = 3, line = -5, adj = 0.04, cex = 2.5, col = "blue")
+   mtext(text = paste("Q90 =",q_plot[2],"m"), side = 3, line = -8, adj = 0.04, cex = 2.5, col = "blue")
 # Seasonal.
    #buoy_month <- mat_buoy_obs[,2]
    #buoy_ONDJFM <- which(buoy_month == "1" | buoy_month == "2" | buoy_month == "3" | buoy_month == "10" | buoy_month == "11" | buoy_month == "12")
@@ -162,4 +171,5 @@
    #abline(a=0,b=1)
 
    dev.off()
+   system(paste("okular",fig_file_name,"&> /dev/null &"))
 

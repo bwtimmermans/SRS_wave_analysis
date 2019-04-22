@@ -6,7 +6,7 @@
 # Libraries.
    library(ncdf4)
    library(TTR)
-   source("/home/ben/research/NOC/SRS_wave_analysis/analysis/quantile_CI.R")
+   source("/home/ben/research/NOC/SRS_wave_analysis/analysis/functions/quantile_CI.R")
 
 # ================================================================= #
 # Data path.
@@ -17,7 +17,9 @@
    #IMOS_SRS-Surface-Waves_MW_JASON-1_FV02_052N-205E-DM00.nc
 
 # Buoy 46066, 52.785N 155.047W
-   buoy_list <- c("51004")
+   #buoy_list <- c("46066")
+   #buoy_list <- c("51004")
+   buoy_list <- c("41002")
 
 #-----------------------------------------------------------------------#
 # Buoy data.
@@ -68,7 +70,12 @@
 # Trend based upon annual data.
 #-----------------------------------------------------------------------#
 # Bin data by year.
-   seq_years <- 1985:2018
+   if (mat_buoy_obs[3,1] < 100) {
+      start_year <- mat_buoy_obs[3,1] + 1900
+   } else {
+      start_year <- mat_buoy_obs[3,1]
+   }
+   seq_years <- start_year:2018
    list_years <- list(length(seq_years))
    for (yy in 1:length(seq_years)) {
       if ( seq_years[yy] <= 1998 ) {
@@ -80,22 +87,25 @@
       }
    }
 
-## Take fixed daily mean.
-#   mat_day_idx <- cbind(seq(1,,24,400),seq(24,,24,400))
-#   for (yy in 1:length(seq_years)) {
-#      hs_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]]) })
-#      list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
-#   }
-
-# Take moving daily average.
+# Take fixed daily mean.
+   hs_temp_resid <- NULL
+   mat_day_idx <- cbind(seq(1,,24,400),seq(24,,24,400))
    for (yy in 1:length(seq_years)) {
-      if ( length(list_years[[yy]]) > 100 ) {
-         hs_temp <- SMA(x=list_years[[yy]],n=48)
-         list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
-      } else {
-         list_years[[yy]] <- NA
-      }
+      hs_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]]) })
+      hs_temp_resid_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { list_years[[yy]][x[1]:x[2]] - median(list_years[[yy]][x[1]:x[2]]) })
+      hs_temp_resid <- c(hs_temp_resid,hs_temp_resid_temp[!is.na(hs_temp_resid_temp)])
+      list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
    }
+
+## Take moving daily average.
+#   for (yy in 1:length(seq_years)) {
+#      if ( length(list_years[[yy]]) > 100 ) {
+#         hs_temp <- SMA(x=list_years[[yy]],n=48)
+#         list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+#      } else {
+#         list_years[[yy]] <- NA
+#      }
+#   }
 
 # Find quantiles and uncertainty.
    vec_q <- c(0.5,0.9,0.95)
@@ -107,15 +117,33 @@
    for (qq in 1:length(vec_q)) {
       array_q_CI[,,qq] <- t(sapply(X=list_years,FUN=function(x) { sort(x)[quantile.CI(length(x),q=vec_q[qq])$Interval] }))
    }
+# Weights for wieghted least squares.
+   vec_CI_w <- ( max(array_q_CI[,1,qq],na.rm=T)/array_q_CI[,1,qq] + max(array_q_CI[,2,qq],na.rm=T)/array_q_CI[,2,qq] ) / 2
+   vec_CI_w[is.na(vec_CI_w)] <- 1
 
-   X11()
-   par(mfrow=c(1,3))
-   for (qq in 1:3) {
-      lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q)
-      plot(df_Q[,c(1,(qq+1))],ylim=c(0,6))
-      arrows(df_Q$year, array_q_CI[,1,qq], df_Q$year, array_q_CI[,2,qq], length=0.05, angle=90, code=3)
-      abline(lm_Q)
+   fig_file_name <- paste("./figures/",buoy_name,"_annual_trend.png",sep="")
+   #X11()
+   png(filename = fig_file_name, width = 2200, height = 2200)
+   par(mfrow=c(2,2),oma=c(1.5,1.5,3,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
+   for (qq in 1:length(vec_q)) {
+      lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q,weights=vec_CI_w)
+      sum_lm_Q <- summary(lm_Q)
+      print(summary(lm_Q))
+
+      plot(df_Q[,c(1,(qq+1))],ylim=c(0,7),cex.main=3.0,cex.lab=3.0,cex.axis=3.0,lwd=3.0)
+      arrows(df_Q$year, array_q_CI[,1,qq], df_Q$year, array_q_CI[,2,qq], length=0.05, angle=90, code=3, lwd=2)
+      abline(lm_Q,lwd=3)
+
+      if ( sum_lm_Q$coefficients[8] < 0.1 ) {
+         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[4],digits=2),"m per year. Significant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[8],digits=2),sep="")
+      } else {
+         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[4],digits=2),"m per year. Not significant, Pr(>|t|) = ",format(sum_lm_Q$coefficients[8],digits=2),sep="")
+      }
+      mtext(text = trend_sig, side = 3, line = -5, cex = 3)
    }
+   mtext(text = paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name), outer = TRUE, side = 3, line = -2, cex = 4)
+   dev.off()
+   system(paste("okular",fig_file_name,"&> /dev/null &"))
    
 ##-----------------------------------------------------------------------#
 ## Satellite data.
