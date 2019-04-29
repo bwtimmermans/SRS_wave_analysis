@@ -13116,17 +13116,48 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">An analysis of IMOS SRS ocean wave height satellite observation dataset.<a class="anchor-link" href="#An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">&#182;</a></h1>
+<h1 id="An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">An analysis of IMOS SRS ocean wave height satellite observation dataset.<a class="anchor-link" href="#An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">&#182;</a></h1><h2 id="Project-contents">Project contents<a class="anchor-link" href="#Project-contents">&#182;</a></h2><p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary (this page)</a></b></p>
+
+<pre><code>An overview of the components of the research, including reference material.
+
+</code></pre>
+<p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/SRS_temporal_trend_R.html>Satellite temporal trends</a></b></p>
+
+<pre><code>Examination of temporal trends in satellite observations of wave height.
+
+</code></pre>
+<p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/quantile_estimation_R.html>Quantile estimation</a></b></p>
+
+<pre><code>A description of issues assocaited with quantile estimation and some methods.</code></pre>
+
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="References">References<a class="anchor-link" href="#References">&#182;</a></h1><p><a href=https://journals.ametsoc.org/doi/full/10.1175/JTECH-D-16-0145.1>Calibration and Cross Validation of a Global Wind and Wave Database of Altimeter, Radiometer, and Scatterometer Measurements, Young et al. (2017)</a> describe some details of their findings when calibrating and comparing observations of wave heights from a range of data sources.</p>
-<p><a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a> describe the production of the data base.
+<h1 id="References">References<a class="anchor-link" href="#References">&#182;</a></h1><h3 id="Dataset-and-production">Dataset and production<a class="anchor-link" href="#Dataset-and-production">&#182;</a></h3><p><a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a> describe the production of the data base.
 Products analyzed here were obtained from: <a href=http://thredds.aodn.org.au/thredds/catalog/IMOS/SRS/Surface-Waves/Wave-Wind-Altimetry-DM00/catalog.html>http://thredds.aodn.org.au/thredds/catalog/IMOS/SRS/Surface-Waves/Wave-Wind-Altimetry-DM00/catalog.html</a></p>
+<p><a href=https://journals.ametsoc.org/doi/full/10.1175/JTECH-D-16-0145.1>Calibration and Cross Validation of a Global Wind and Wave Database of Altimeter, Radiometer, and Scatterometer Measurements, Young et al. (2017)</a> describe some details of their findings when calibrating and comparing observations of wave heights from a range of data sources.</p>
+<h3 id="Trends-in-wave-height">Trends in wave height<a class="anchor-link" href="#Trends-in-wave-height">&#182;</a></h3><p><a href=https://www.jcronline.org/doi/pdf/10.2112/07-0894.1>Increasing Hurricane-Generated Wave Heights along the U.S. East Coast and Their Climate Controls, Komar and Allan</a></p>
+<p><a href=https://www.sciencedirect.com/science/article/pii/S1463500309002066>Dodet et al. 2010, Wave climate variability in the North-East Atlantic Ocean over the last six decades, Ocean Modelling Volume 31, Issues 3–4, 2010, Pages 120-131</a></p>
+<h3 id="Trends-in-extreme-wave-height">Trends in extreme wave height<a class="anchor-link" href="#Trends-in-extreme-wave-height">&#182;</a></h3><p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2008GL035394>Menendez et al. 2008, Variability of extreme wave heights in the northeast Pacific Oceanbased on buoy measurements, GRL</a></p>
+<p><a href=https://www.jcronline.org/doi/abs/10.2112/07-0894.1>Paul D. Komar and Jonathan C. Allan (2008) Increasing Hurricane-Generated Wave Heights along the U.S. East Coast and Their Climate Controls. Journal of Coastal Research: Volume 24, Issue 2: pp. 479 – 488</a></p>
+<p><a href=https://www.sciencedirect.com/science/article/pii/S0029801807001886>Méndez, et al. 2008, Seasonality and duration in extreme value distributions of significant wave height, Ocean Engineering Volume 35, Issue 1, January 2008, Pages 131-138</a></p>
+<h3 id="Hindcasts">Hindcasts<a class="anchor-link" href="#Hindcasts">&#182;</a></h3><p><a href=https://www.sciencedirect.com/science/article/pii/S0378383917300443>Perez et al. GOW2: A global wave hindcast for coastal applications, Coastal Engineering</a></p>
+<h3 id="Projections-and-wave-climate-general">Projections and wave climate general<a class="anchor-link" href="#Projections-and-wave-climate-general">&#182;</a></h3><p><a href=https://www.sciencedirect.com/science/article/pii/S1463500315001134>Erikson et al. 2015, Projected wave conditions in the Eastern North Pacific under the influence of two CMIP5 climate scenarios</a></p>
 <p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016GL071681>Timmermans et al. (2017)</a> describe the characteristics of simulated wave climate at different resolution, and provide some comparisons of simulated wind and wave height data with observations.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Statistical-considerations">Statistical considerations<a class="anchor-link" href="#Statistical-considerations">&#182;</a></h1><h3 id="Uncertainty-estimation-for-quantiles">Uncertainty estimation for quantiles<a class="anchor-link" href="#Uncertainty-estimation-for-quantiles">&#182;</a></h3><p>The approach to estimating confidence intervals on, for example, the median (Q50), is described here.</p>
+<h3 id="Pairwise-metrics-under-misaligned-observations">Pairwise metrics under misaligned observations<a class="anchor-link" href="#Pairwise-metrics-under-misaligned-observations">&#182;</a></h3><p>Paired observations are required in order to compute various useful metrics, such as correlation or covariance, rather than a simple difference in mean, for example. For satellite observations along tracks, this raises an interesting problem, because observations along tracks (i.e. ptemporally periodic along a fixed path), rarely coincide closely (in a spatiotemporal sense) with observations made at a fixed location, such as a moored buoy.</p>
+<p>The loss of shared information in this setup depends strongly on the spatiotemporal variability of the observed quantity &#8212; in this case typically $H_s$. Many studies involving the comparison of wave height data from buoys and satellite retrieval (e.g. <a href=https://journals.ametsoc.org/doi/full/10.1175/JTECH-D-16-0145.1>Young et al., 2017)</a> use a "match-up" criteria based upon a limiting 30 minute window and 50 km spatial separation. However, this could be clearly problematic if match-ups with the largest deviations are given equal weight in a calculation, to those with zero deviation.</p>
+<p><a href="https://stats.stackexchange.com/questions/221246/such-thing-as-a-weighted-correlation">https://stats.stackexchange.com/questions/221246/such-thing-as-a-weighted-correlation</a></p>
 
 </div>
 </div>
@@ -13169,6 +13200,15 @@ Figure 2 from Ribal and Young (2019) shows the temporal coincidence of missions.
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Co-location-analysis">Co-location analysis<a class="anchor-link" href="#Co-location-analysis">&#182;</a></h1><p><i>Code: qqplot_SRS_buoy.R</i></p>
+<p>The earlier Q-Q plots were constructed on the (clearly incorrect) assumptions that the buoy and satellite observations were perfectly coincident in space and time. The satellite tracks were constrained to a $1^\circ \times 1^\circ$ cell which could result in ~100 km spatial discrepancy between buoy and track. In order to examine the distribution of "residuals" more closely</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Spatial-summary-statitics">Spatial summary statitics<a class="anchor-link" href="#Spatial-summary-statitics">&#182;</a></h1><p><i>Code: IMOS_stats.R; ggplot_stats.R</i></p>
 <h4 id="Missions:">Missions:<a class="anchor-link" href="#Missions:">&#182;</a></h4><p><li><b>ERS-2</b></p>
 <p><li><b>GFO</b></p>
@@ -13199,15 +13239,29 @@ Figure 2 from Ribal and Young (2019) shows the temporal coincidence of missions.
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Exploration-of-temporal-trends">Exploration of temporal trends<a class="anchor-link" href="#Exploration-of-temporal-trends">&#182;</a></h1><h2 id="Buoys">Buoys<a class="anchor-link" href="#Buoys">&#182;</a></h2><p><i>Code: trend_buoy.R</i></p>
-<p>In some locations NDBC buoys provide several decades of observational data. These can be used to search for the existance of temporal trends. Following the previous section, we look at 46066 (18 years, North East Pacific), 51004 (34 years, Hawaii) and 41002 (44 years, Western Atlantic).</p>
+<h1 id="Exploration-of-temporal-trends">Exploration of temporal trends<a class="anchor-link" href="#Exploration-of-temporal-trends">&#182;</a></h1><h2 id="Buoys">Buoys<a class="anchor-link" href="#Buoys">&#182;</a></h2><p><i>Code: buoy_trend.R</i></p>
+<p>In some locations NDBC buoys provide several decades of observational data. These can be used to search for the existance of temporal trends. Following the previous section, we look at 46066 (18 years, North East Pacific), 46006 (41 years, North East Pacific), 51004 (34 years, Hawaii) and 41002 (44 years, Western Atlantic).</p>
 <p>The following figures show a weighted linear model fitted to 0.5 (median), 0.9 and 0.95 quantiles of annual $H_s$ observations. Confidence intervals for the quantiles were obtained according to XXX.</p>
 <p><img src="./analysis/figures/46066_annual_trend.png"></p>
+<p><img src="./analysis/figures/46006_annual_trend.png"></p>
 <p><img src="./analysis/figures/51004_annual_trend.png"></p>
 <p><img src="./analysis/figures/41002_annual_trend.png"></p>
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div>
     </div>
   </div>
