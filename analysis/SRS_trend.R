@@ -11,10 +11,10 @@
 
 # ================================================================= #
 # Specify domain.
-   lon_range <- 140:240
+   lon_range <- 190:200
    #lon_range <- 210:220
    lon_mid <- lon_range+0.5
-   lat_range <- 0:60
+   lat_range <- 30:40
    #lat_range <- 40:50
    lat_mid <- lat_range+0.5
 
@@ -66,9 +66,9 @@
             nc1_f <- paste(data_path,array_filenames[lat_idx,lon_idx,m_idx],sep="")
 
             if(! (file.exists(nc1_f) )) {
-               print("File does not exist!")
+               print(paste(nc1_f,": File does not exist!"))
                print(paste("LAT:",lat_range[lat_idx],"; LON:",lon_range[lon_idx]))
-               array_block[lat_idx,lon_idx,,] <- NA
+               array_block[lat_idx,lon_idx,,m_idx] <- NA
             } else {
 # Open file.
                nc1 = nc_open(nc1_f)
@@ -165,16 +165,19 @@
                array_annual_stats[y_idx,,c(1,3)] <- t(sapply(X=vec_q,FUN=function(x) { sort(temp_annual_hs)[quantile.CI(length(temp_annual_hs),q=x)$Interval] }))
             }
             mat_list_annual_KU[[lat_idx,lon_idx]] <- array_annual_stats
-# Trend.
+# Trend (linear regression).
             mat_b_q <- mat_list_annual_KU[[lat_idx,lon_idx]][,,2]
             colnames(mat_b_q) <- paste("Q",100*vec_q,sep="")
             df_Q <- data.frame(cbind(year=anal_years,mat_b_q))
 
             mat_trend <- matrix(NA,nrow=length(vec_q),ncol=2)
             for (qq in 1:length(vec_q)) {
-               lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q)
-               sum_lm_Q <- summary(lm_Q)
-               mat_trend[qq,] <- c(sum_lm_Q$coefficients[2],sum_lm_Q$coefficients[8])
+# Catch if lack of data for regression.
+               if (!all(is.na(df_Q[,(qq+1)]))) {
+                  lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q)
+                  sum_lm_Q <- summary(lm_Q)
+                  mat_trend[qq,] <- c(sum_lm_Q$coefficients[2],sum_lm_Q$coefficients[8])
+               }
             }
             colnames(mat_trend) <- c("year_slope","Pr(>|t|)")
             mat_list_annual_trend[[lat_idx,lon_idx]] <- mat_trend
