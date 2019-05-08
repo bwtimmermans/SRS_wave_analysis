@@ -10,13 +10,24 @@
    source("/home/ben/research/NOC/SRS_wave_analysis/analysis/functions/quantile_CI.R")
 
 # ================================================================= #
+# Edit here
+# ----------------------------------------------------------------- #
+
 # Specify domain.
-   lon_range <- 190:200
-   #lon_range <- 210:220
+   lon_range <- 140:239
+   #lon_range <- 210:219
    lon_mid <- lon_range+0.5
-   lat_range <- 30:40
-   #lat_range <- 40:50
+   lat_range <- 0:59
+   #lat_range <- 0:11
    lat_mid <- lat_range+0.5
+
+# Resolution (1 = 1 degree, 2 = 2 degree, etc).
+   res <- 2
+   mat_lat_grid_idx <- matrix(1:length(lat_range),nrow=res)
+   mat_lon_grid_idx <- matrix(1:length(lon_range),nrow=res)
+
+# Data set selection.
+   mission_idx <- 2:6
 
 # ================================================================= #
 # Data path.
@@ -24,15 +35,12 @@
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
    mat_valid_dates <- cbind(c(1986,1990),c(1992,1995),c(1993,2004),c(1996,2008),c(1999,2007),c(2002,2012),c(2009,2017),c(2011,2017),c(2012,2017),c(2014,2017),c(2016,2017),c(2017,2017))
 
-# Data set selection.
-   mission_idx <- 2:6
-
 # File base name.
    #array_filenames <- array(NA,dim=c(length(lat_range),length(lon_range),length(mission_idx)))
    array_filenames <- NULL
    for (m_idx in mission_idx) {
       nc_sat1 <- paste(vec_datasets[m_idx],"/IMOS_SRS-Surface-Waves_MW_",vec_datasets[m_idx],"_FV02_",sep="")
-      vec_lat_sat <- paste("0",rev(lat_range),"N",sep="")
+      vec_lat_sat <- unlist( lapply(X=rev(lat_range),FUN=function(x) { paste(tail(strsplit(paste("00",x,"N",sep=""),split='')[[1]],n=4),collapse='') } ) )
       vec_lon_sat <- paste(lon_range,"E",sep="")
       vec_lonlat_sat <- paste(rep(vec_lat_sat,times=length(vec_lon_sat)),"-",rep(vec_lon_sat,each=length(vec_lat_sat)),sep="")
       vec_filenames_sat1 <- paste(nc_sat1,vec_lonlat_sat,"-DM00.nc",sep="")
@@ -45,10 +53,10 @@
 
 # ================================================================= #
 # Set up variables.
-# Matrix to store "block" Q50s and time index per mission.
+# Array to store "block" Q50s and time index per mission.
    array_block <- array(list(),dim=c(length(vec_lat_sat),length(vec_lon_sat),2,length(mission_idx)))
 
-# Loop over different locations.
+# Loop over grid cells.
    for (lon_idx in 1:length(lon_range)) {
    #for (lon_idx in 16:17) {
       for (lat_idx in 1:length(lat_range)) {
@@ -131,32 +139,37 @@
    }
 
 # Create data structure including metadata.
-   array_meta <- list(mission_idx=mission_idx,data_name=vec_datasets[mission_idx],lat=lat_mid,lon=lon_mid,lab_stat=c("date","block_Q50"))
-   list_SRS_blocks <- list(array_meta,array_block)
+   array_meta <- list(mission_idx=mission_idx,data_name=vec_datasets[mission_idx],lat_cell=lat_range,lon_cell=lon_range,lat_mid=lat_mid,lon_mid=lon_mid,lab_stat=c("date","block_Q50"))
+   #list_SRS_blocks <- list(array_meta,array_block)
 # Write out data.
-   data_file <- paste("./output/test_block/list_",paste(vec_datasets[mission_idx],collapse='_'),"_blocks.Robj",sep="")
-   save(list_SRS_blocks,file = data_file)
+   #data_file <- paste("./output/test_block/list_",paste(vec_datasets[mission_idx],collapse='_'),"_blocks.Robj",sep="")
+   #save(list_SRS_blocks,file = data_file)
 
 # ================================================================= #
 # Summary data and temporal processing.
 # Loop over years to get obs per year across all missions.
 
 # Data structures.
-   mat_list_annual_KU <- matrix(list(),nrow=length(vec_lat_sat),ncol=length(vec_lon_sat))
-   mat_list_annual_trend <- matrix(list(),nrow=length(vec_lat_sat),ncol=length(vec_lon_sat))
+   mat_list_annual_KU <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
+   mat_list_annual_trend <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    vec_q <- c(0.5,0.9,0.95)
 
-# Loop.
-   for (lon_idx in 1:length(lon_range)) {
-      for (lat_idx in 1:length(lat_range)) {
+# Loop over cells by resolution.
+   for (lon_res_idx in 1:dim(mat_lon_grid_idx)[2]) {
+      for (lat_res_idx in 1:dim(mat_lat_grid_idx)[2]) {
 # Array for annual data (stats, CIs).
          array_annual_stats <- array(NA,dim=c(length(anal_years),length(vec_q),3))
-         if (!all(is.na(unlist(array_block[lat_idx,lon_idx,,])))) {
+         if (!all(is.na(unlist(array_block[mat_lat_grid_idx[,lat_res_idx],mat_lon_grid_idx[,lon_res_idx],,])))) {
             for (y_idx in 1:length(anal_years)) {
                temp_annual_hs <- NULL
                for (m_idx in 1:length(mission_idx)) {
-                  if (!is.na(array_block[lat_idx,lon_idx,1,m_idx])) {
-                     temp_annual_hs <- c(temp_annual_hs,array_block[[lat_idx,lon_idx,2,m_idx]][which(format(array_block[[lat_idx,lon_idx,1,m_idx]],"%Y") == anal_years[y_idx])])
+# Loop over res "sub" indices.
+                  for (lon_idx in mat_lon_grid_idx[,lon_res_idx]) {
+                     for (lat_idx in mat_lat_grid_idx[,lat_res_idx]) {
+                        if (!is.na(array_block[lat_idx,lon_idx,1,m_idx])) {
+                           temp_annual_hs <- c(temp_annual_hs,array_block[[lat_idx,lon_idx,2,m_idx]][which(format(array_block[[lat_idx,lon_idx,1,m_idx]],"%Y") == anal_years[y_idx])])
+                        }
+                     }
                   }
                }
 # Do stats.
@@ -164,9 +177,9 @@
 # Do CIs.
                array_annual_stats[y_idx,,c(1,3)] <- t(sapply(X=vec_q,FUN=function(x) { sort(temp_annual_hs)[quantile.CI(length(temp_annual_hs),q=x)$Interval] }))
             }
-            mat_list_annual_KU[[lat_idx,lon_idx]] <- array_annual_stats
+            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- array_annual_stats
 # Trend (linear regression).
-            mat_b_q <- mat_list_annual_KU[[lat_idx,lon_idx]][,,2]
+            mat_b_q <- mat_list_annual_KU[[lat_res_idx,lon_res_idx]][,,2]
             colnames(mat_b_q) <- paste("Q",100*vec_q,sep="")
             df_Q <- data.frame(cbind(year=anal_years,mat_b_q))
 
@@ -180,16 +193,23 @@
                }
             }
             colnames(mat_trend) <- c("year_slope","Pr(>|t|)")
-            mat_list_annual_trend[[lat_idx,lon_idx]] <- mat_trend
+            mat_list_annual_trend[[lat_res_idx,lon_res_idx]] <- mat_trend
          } else {
-            mat_list_annual_KU[[lat_idx,lon_idx]] <- NA
-            mat_list_annual_trend[[lat_idx,lon_idx]] <- NA
+            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
+            mat_list_annual_trend[[lat_res_idx,lon_res_idx]] <- NA
          }
       }
    }
 
 # Create data structure for saving, including metadata.
-   array_meta <- c(list_SRS_blocks[[1]],list(trend_stats=paste("Q",100*c(0.5,0.9,0.95),sep=""),trend=c("slope","P-val")))
+   list_SRS_blocks_meta <- list_SRS_blocks[[1]]
+   list_SRS_blocks_meta$orig_lat_cell <- list_SRS_blocks_meta$lat_cell
+   list_SRS_blocks_meta$orig_lon_cell <- list_SRS_blocks_meta$lon_cell
+   list_SRS_blocks_meta$lat_cell <- matrix(list_SRS_blocks_meta$lat_cell,nrow=res)[1,]
+   list_SRS_blocks_meta$lon_cell <- matrix(list_SRS_blocks_meta$lon_cell,nrow=res)[1,]
+   list_SRS_blocks_meta$lat_mid <- list_SRS_blocks_meta$lat_cell + (res/2)
+   list_SRS_blocks_meta$lon_mid <- list_SRS_blocks_meta$lon_cell + (res/2)
+   array_meta <- c(list_SRS_blocks_meta,list(trend_stats=paste("Q",100*c(0.5,0.9,0.95),sep=""),trend=c("slope","P-val")))
    list_SRS_trend <- list(array_meta,mat_list_annual_trend)
 # Write out data.
    data_file <- paste("./output/test_block/list_",paste(vec_datasets[mission_idx],collapse='_'),"_trend.Robj",sep="")

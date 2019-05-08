@@ -8,6 +8,10 @@
    library(abind)
    library(extRemes)
    source("/home/ben/research/NOC/SRS_wave_analysis/analysis/functions/quantile_CI.R")
+# MPI.
+   library(pbdMPI, quietly = TRUE)
+   .comm.size <- comm.size()
+   .comm.rank <- comm.rank()
 
 # ================================================================= #
 # Edit here
@@ -23,14 +27,29 @@
 
 # Resolution (1 = 1 degree, 2 = 2 degree, etc).
    res <- 2
+
+# Parallelise over the geographic range, by longitude.
+# Parallelise over longitude, divide the range by number of processing cores.
+   dim.lon <- length(lon_range)
+   lon.base <- floor(dim.lon / .comm.size)
+   #vec.lon_dim <- rep( lon.base, .comm.size ) + c( rep(1,dim.lon %% .comm.size), rep(0,(.comm.size - dim.lon %% .comm.size)) )
+   vec.lon_dim <- res * ( floor( ( dim.lon / res ) / .comm.size) + c( rep(1,( dim.lon / res ) %% .comm.size), rep(0,(.comm.size - ( dim.lon / res ) %% .comm.size)) ) )
+
+   lon.start.idx <- sum( vec.lon_dim[c(0:.comm.rank)] ) + 1
+   lon.dim.node <- vec.lon_dim[.comm.rank+1]
+
+   lon_range_node <- lon_range[lon.start.idx:(lon.start.idx + lon.dim.node - 1)]
+   print(paste("lon_range_node:",lon_range_node))
+
+# Grid indices for aggregation.
    mat_lat_grid_idx <- matrix(1:length(lat_range),nrow=res)
-   mat_lon_grid_idx <- matrix(1:length(lon_range),nrow=res)
+   mat_lon_grid_idx <- matrix(1:length(lon_range_node),nrow=res)
 
 # Data set selection.
-   mission_idx <- 2:6
+   mission_idx <- 2:10
 
 # Months for analysis.
-   flag_annual <- FALSE
+   flag_annual <- TRUE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
    #anal_months <- c("07","08","09")
@@ -55,12 +74,12 @@
    mat_valid_dates <- cbind(c(1986,1990),c(1992,1995),c(1993,2004),c(1996,2008),c(1999,2007),c(2002,2012),c(2009,2017),c(2011,2017),c(2012,2017),c(2014,2017),c(2016,2017),c(2017,2017))
 
 # File base name.
-   #array_filenames <- array(NA,dim=c(length(lat_range),length(lon_range),length(mission_idx)))
+   #array_filenames <- array(NA,dim=c(length(lat_range),length(lon_range_node),length(mission_idx)))
    array_filenames <- NULL
    for (m_idx in mission_idx) {
       nc_sat1 <- paste(vec_datasets[m_idx],"/IMOS_SRS-Surface-Waves_MW_",vec_datasets[m_idx],"_FV02_",sep="")
       vec_lat_sat <- unlist( lapply(X=rev(lat_range),FUN=function(x) { paste(tail(strsplit(paste("00",x,"N",sep=""),split='')[[1]],n=4),collapse='') } ) )
-      vec_lon_sat <- paste(lon_range,"E",sep="")
+      vec_lon_sat <- paste(lon_range_node,"E",sep="")
       vec_lonlat_sat <- paste(rep(vec_lat_sat,times=length(vec_lon_sat)),"-",rep(vec_lon_sat,each=length(vec_lat_sat)),sep="")
       vec_filenames_sat1 <- paste(nc_sat1,vec_lonlat_sat,"-DM00.nc",sep="")
       mat_filenames_sat1 <- matrix(vec_filenames_sat1,nrow=length(vec_lat_sat))
@@ -73,7 +92,7 @@
 # ================================================================= #
 # Data structures.
    mat_list_annual_KU <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
-   mat_list_annual_trend <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
+   mat_list_annual_trend_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    vec_q <- c(0.5,0.9,0.95)
 
 # Loop over cells by resolution.
@@ -102,7 +121,7 @@
 
                   if(! (file.exists(nc1_f) )) {
                      print(paste(nc1_f,": File does not exist!"))
-                     print(paste("LAT:",lat_range[lat_idx],"; LON:",lon_range[lon_idx]))
+                     print(paste("LAT:",lat_range[lat_idx],"; LON:",lon_range_node[lon_idx]))
                      #mat_block_temp[,m_idx] <- NA
                   } else {
 # Open file.
@@ -127,10 +146,10 @@
 # Temporal processing.
 # Loop over years to get obs per year across all missions.
             if (!is.null(nc1_time_idx)) {
-               nc1_date_temp1 <- as.POSIXct(nc1_time_idx*3600*24, origin = '1985-01-01', tz='GMT')
-               #if (!flag_annual) {
-                  nc1_date_temp <- nc1_date_temp1[ format(nc1_date_temp1,"%m") %in% anal_months ]
-               #}
+               nc1_date_temp <- as.POSIXct(nc1_time_idx*3600*24, origin = '1985-01-01', tz='GMT')
+               if (!flag_annual) {
+                  nc1_date_temp <- nc1_date_temp[ format(nc1_date_temp,"%m") %in% anal_months ]
+               }
                for (y_idx in 1:length(anal_years)) {
                   mat_annual_hs[[y_idx,m_idx]] <- nc1_SHW_KU[which(format(nc1_date_temp,"%Y") == anal_years[y_idx])]
                }
@@ -164,13 +183,18 @@
             colnames(mat_trend) <- c("year_slope","Pr(>|t|)")
 # Store for writing.
             mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- array_annual_stats
-            mat_list_annual_trend[[lat_res_idx,lon_res_idx]] <- mat_trend
+            mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- mat_trend
          } else{
             mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
-            mat_list_annual_trend[[lat_res_idx,lon_res_idx]] <- NA
+            mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA
          }
       }
    }
+
+# Gather all the output into a single array, along longitude.
+   source("/home/ben/research/code/R/func_abind/func_abind.R")
+   #array.chi <- do.call( func_abind, list( allgather( mat_list_annual_trend_node ), along=1 ) )
+   mat_list_annual_trend <- do.call( cbind, allgather( mat_list_annual_trend_node ) )
 
 # Create data structure including metadata.
    array_meta <- list(mission_idx=mission_idx,data_name=vec_datasets[mission_idx],time_period=lab_months,
@@ -179,50 +203,10 @@
                       lat_mid=(matrix(lat_range,nrow=res)[1,] + (res/2)),lon_mid=(matrix(lon_range,nrow=res)[1,] + (res/2)),
                       trend_stats=paste("Q",100*c(0.5,0.9,0.95),sep=""),trend=c("slope","P-val"))
    list_SRS_trend <- list(array_meta,mat_list_annual_trend)
+
 # Write out data.
-   data_file <- paste("./output/all_KU/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
+   data_file <- paste("./output/mpi_test/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
    save(list_SRS_trend,file = data_file)
 
-## ================================================================= #
-## Plotting the trend for a single grid cell.
-#   mat_b_q <- mat_list_annual_KU[[lat_idx,lon_idx]][,,2]
-#   colnames(mat_b_q) <- paste("Q",100*c(0.5,0.9,0.95),sep="")
-#   df_Q <- data.frame(cbind(year=anal_years,mat_b_q))
-#
-## Weights for weighted least squares (crude).
-#   array_q_CI <- abind(mat_list_annual_KU[[lat_idx,lon_idx]][,,1],mat_list_annual_KU[[lat_idx,lon_idx]][,,3],along=3)
-#   mat_CI_w <- matrix(NA,nrow=length(anal_years),ncol=length(vec_q))
-#   for (qq in 1:length(vec_q)) {
-#      mat_CI_w[,qq] <- max(mat_list_annual_KU[[lat_idx,lon_idx]][,qq,3] - mat_list_annual_KU[[lat_idx,lon_idx]][,qq,1],na.rm=T) /
-#                  (mat_list_annual_KU[[lat_idx,lon_idx]][,qq,3] - mat_list_annual_KU[[lat_idx,lon_idx]][,qq,1])
-#   }
-#   #vec_CI_w[is.na(vec_CI_w)] <- 1
-#
-## Plot.
-#   fig_file_name <- paste("./figures/",paste(c(lat_range[lat_idx],lon_range[lon_idx],vec_datasets[mission_idx]),collapse='_'),"_annual_trend.png",sep="")
-#   #X11()
-#   png(filename = fig_file_name, width = 2200, height = 2200)
-#   par(mfrow=c(2,2),oma=c(1.5,1.5,3,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
-#   for (qq in 1:length(vec_q)) {
-## Weights.
-#      #lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q,weights=vec_CI_w)
-## No weighting.
-#      lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q)
-#      sum_lm_Q <- summary(lm_Q)
-#      print(summary(lm_Q))
-#
-#      plot(df_Q[,c(1,(qq+1))],ylim=c(0,7),cex.main=3.0,cex.lab=3.0,cex.axis=3.0,lwd=3.0)
-#      arrows(df_Q$year, array_q_CI[,qq,1], df_Q$year, array_q_CI[,qq,2], length=0.05, angle=90, code=3, lwd=2)
-#      abline(lm_Q,lwd=3)
-#
-#      if ( sum_lm_Q$coefficients[8] < 0.1 ) {
-#         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2],digits=2),"m per year. Significant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[8],digits=2),sep="")
-#      } else {
-#         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2],digits=2),"m per year. Not significant, Pr(>|t|) = ",format(sum_lm_Q$coefficients[8],digits=2),sep="")
-#      }
-#      mtext(text = trend_sig, side = 3, line = -5, cex = 3)
-#   }
-#   mtext(text = paste("Trend in Q50, Q90, Q95 at LON:",lon_mid[lon_idx],"LAT:",lat_mid[lat_idx],"from",paste(vec_datasets[mission_idx],collapse=', ')), outer = TRUE, side = 3, line = -2, cex = 4)
-#   dev.off()
-#   system(paste("okular",fig_file_name,"&> /dev/null &"))
-#
+   finalize()
+

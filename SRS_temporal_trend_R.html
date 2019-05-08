@@ -13129,15 +13129,43 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Satellite">Satellite<a class="anchor-link" href="#Satellite">&#182;</a></h2><p><i>Code: SRS_trend.R; ggplot_SRS_trend.R</i></p>
-<p>Applying the same methodology, we now look at spatial data from satellite missions. The objective here is to treat the satellite archive in its entirety. The spatial domain is restricted to the northern Atlantic for practicaliy. In this case, grid cell "passes" (KU-band) have been averaged, resulting in a loss of data. (Complete data analysis to be analysed next).</p>
-<h3 id="ERS-1-and-ERS-2-only">ERS-1 and ERS-2 only<a class="anchor-link" href="#ERS-1-and-ERS-2-only">&#182;</a></h3><p>As a test, this consinders annual Q50 over a short period of time (2 missions, 1992 to 2008, inclusive). Here, the larger amount of data available in the NE Pacific, due to a data connection outage, is visibly affecting.</p>
-<p><img src="./analysis/figures/SRS_trends/trend_Q50_ERS-1_ERS-2.png"></p>
-<p>Trends in annual Q50 over longer period of time (ERS-1, Topex, ERS-2, GFO, JASON-1). Note missing data arae due to processing errors.</p>
-<p><img src="./analysis/figures/SRS_trends/trend_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<h2 id="Satellite">Satellite<a class="anchor-link" href="#Satellite">&#182;</a></h2><p><i>Code: SRS_trend.R; SRS_trend_alldata.R; SRS_trend_alldata_mpi.R; ggplot_SRS_trend.R</i></p>
+<p>Applying the same methodology, we now look at spatial data from satellite missions. The spatial domain is restricted to the northern Atlantic for practicality. Generally, all KU-band data has been used for analysis, although a comparison is provided between the "dall-data" case, and the case where "pass-medians" have been used. The results are very similar.</p>
+<h3 id="ERS-1,-TOPEX,-ERS-2,-GFO-&amp;-JASON-1">ERS-1, TOPEX, ERS-2, GFO &amp; JASON-1<a class="anchor-link" href="#ERS-1,-TOPEX,-ERS-2,-GFO-&amp;-JASON-1">&#182;</a></h3><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_annual_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1_mpi.png"></p>
+<p>Temporal trends in Q50 Hs for earlier missions spanning 1992 to 2012 (inclusive) reveal a spatially bimodal pattern with negative trend in the northern Pacific and positive trend towards the equator.</p>
+<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_annual_Q90_ERS-1_TOPEX_ERS-2_GFO_JASON-1_mpi.png"></p>
+<p>Temporal trends in Q90 Hs for earlier missions spanning 1992 to 2012 (inclusive) reveal a bimodal pattern with negative trend in the northern Pacific and positive trend towards the equator.</p>
+<h3 id="All-missions,-excluding-GEOSAT,-SARAL,-JASON-3-and-SENTINEL-3A">All missions, excluding GEOSAT, SARAL, JASON-3 and SENTINEL-3A<a class="anchor-link" href="#All-missions,-excluding-GEOSAT,-SARAL,-JASON-3-and-SENTINEL-3A">&#182;</a></h3><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_annual_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_mpi.png"></p>
+<p>Temporal trends in Q50 Hs for missions spanning 1992 to 2017 (inclusive) reveal a much weaker spatial bimodality, where the negative trend in the northern Pacific appears to have mitigated in more recent years by a much stronger positive trend. Additionally, the positive trend in the equatorial region appears to have moved further north.</p>
+<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_annual_Q90_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_mpi.png"></p>
+<p>Spatially, trends in Q90 Hs appear to more closely follow those of Q50 (compared with the analysis of earlier missions). However, similar features are observed such as the band of weaker or possible negative trends lying further south than for Q50.</p>
+<p>We need to be cautious of whether systematic bias in one or more recent missions (e.g. JASO-2, CRYOSAT-2, HY-2) is responsible for the marked change in trend over recent years. Trend can be evaluated for different "sub-periods" within the record.</p>
+<h3 id="Seasonal:-(ERS-1,-TOPEX,-ERS-2,-GFO-&amp;-JASON-1)">Seasonal: (ERS-1, TOPEX, ERS-2, GFO &amp; JASON-1)<a class="anchor-link" href="#Seasonal:-(ERS-1,-TOPEX,-ERS-2,-GFO-&amp;-JASON-1)">&#182;</a></h3><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JFM_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<p>Trends in Q50 Hs based upon January-February-March.</p>
+<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_AMJ_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<p>Trends in Q50 Hs based upon April-May-June.</p>
+<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JAS_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<p>Trends in Q50 Hs based upon July-August-September.</p>
+<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_OND_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<p>Trends in Q50 Hs based upon October-November-December.</p>
+<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JFND_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<p>Trends in Q50 Hs based upon November-December-January-February.</p>
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div>
     </div>
   </div>
