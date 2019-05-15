@@ -13118,10 +13118,26 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Project-summary">Project summary<a class="anchor-link" href="#Project-summary">&#182;</a></h1><h3>Please visit project summary here: <a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary</a></h3>
 <h1 id="Exploration-of-temporal-trends">Exploration of temporal trends<a class="anchor-link" href="#Exploration-of-temporal-trends">&#182;</a></h1><h2 id="Buoys">Buoys<a class="anchor-link" href="#Buoys">&#182;</a></h2><p><i>Code: buoy_trend.R; SRS_trend.R; ggplot_SRS_trend.R</i></p>
-<p>Earlier we looked at temporal trends at 46066 (18 years, North East Pacific) and 46006 (41 years, North East Pacific).</p>
-<p>The following figures show a weighted linear model fitted to 0.5 (median), 0.9 and 0.95 quantiles of annual $H_s$ observations. Confidence intervals for the quantiles were obtained following the approach described <a href=https://bwtimmermans.github.io/SRS_wave_analysis/quantile_estimation_R>here</a>.</p>
-<p><img src="./analysis/figures/46066_annual_trend.png"></p>
-<p><img src="./analysis/figures/41002_annual_trend.png"></p>
+<p>Here we look at temporal trends at a few longer duration buoys. However, the raw buoy data is subject to variable quality, particularly only observations for part of the year. The following figures show analyses where partial years (&lt; 75% data) have been removed.</p>
+<h4 id="Buoys:">Buoys:<a class="anchor-link" href="#Buoys:">&#182;</a></h4><p><li>46006 (41 years, North East Pacific)</p>
+<p><li>51004 (34 years, Hawaii)</p>
+<p><li>41002 (44 years, Western Atlantic).</p>
+<h4 id="Analysis:">Analysis:<a class="anchor-link" href="#Analysis:">&#182;</a></h4><p>A (non-weighted) linear model was fitted to 0.5 (median), 0.9 and 0.95 quantiles of annual $H_s$ observations, where the quantiles were estimated from either 24 hourly or 6 hourly means. The different averaging periods reflect uncertainty over the level of autocorrelation in the data. This depends upon the temporal variability of the weather at the buoy location. Where variability is on shorter timescales, successive observations will tend to be more independent. Confidence intervals for the quantiles were obtained following the approach described <a href=https://bwtimmermans.github.io/SRS_wave_analysis/quantile_estimation_R>here</a>. They are therefore narrower where data is averaged on a 6 hourly time frame, rather than 24 hours. However, this may not reflect the true uncertainty because 6 hourly observations still be strongly correlated.</p>
+<p><img src="./analysis/figures/buoy_trends/46006_QA_annual_24hr.png"></p>
+<p><img src="./analysis/figures/buoy_trends/46006_QA_annual_6hr.png"></p>
+<h4 id="At-NDBC-46006,-there-is-little-evidence-of-a-trend.-Also,-the-data-suggest-higher-natural-variability-than-indicated-by-the-error-bars,-implying-there-may-be-underlying-quality-issues.">At NDBC 46006, there is little evidence of a trend. Also, the data suggest higher natural variability than indicated by the error bars, implying there may be underlying quality issues.<a class="anchor-link" href="#At-NDBC-46006,-there-is-little-evidence-of-a-trend.-Also,-the-data-suggest-higher-natural-variability-than-indicated-by-the-error-bars,-implying-there-may-be-underlying-quality-issues.">&#182;</a></h4><p><img src="./analysis/figures/buoy_trends/51004_QA_annual_24hr.png"></p>
+<p><img src="./analysis/figures/buoy_trends/51004_QA_annual_6hr.png"></p>
+<h4 id="At-NDBC-51004,-a-robust-negative-trend-is-apparent-in-Q50-and-possibly-higher-quantiles.">At NDBC 51004, a robust negative trend is apparent in Q50 and possibly higher quantiles.<a class="anchor-link" href="#At-NDBC-51004,-a-robust-negative-trend-is-apparent-in-Q50-and-possibly-higher-quantiles.">&#182;</a></h4><p><img src="./analysis/figures/buoy_trends/41002_QA_annual_24hr.png"></p>
+<p><img src="./analysis/figures/buoy_trends/41002_QA_annual_6hr.png"></p>
+<h4 id="NDBC-41002-appears-to-exhibit-much-stronger-evidence-for-a-decreasing-trend-at-Q50,-Q90-and-Q95.-With-6-hourly-averaging,-the-noise-level-appears-to-obscure-the-trend-in-the-higher-quantiles.">NDBC 41002 appears to exhibit much stronger evidence for a decreasing trend at Q50, Q90 and Q95. With 6 hourly averaging, the noise level appears to obscure the trend in the higher quantiles.<a class="anchor-link" href="#NDBC-41002-appears-to-exhibit-much-stronger-evidence-for-a-decreasing-trend-at-Q50,-Q90-and-Q95.-With-6-hourly-averaging,-the-noise-level-appears-to-obscure-the-trend-in-the-higher-quantiles.">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Sources-of-variability">Sources of variability<a class="anchor-link" href="#Sources-of-variability">&#182;</a></h2><p>Many sources of variability affect the appearance and evidence for temporal trends. In particular, sources of interannual variability may be relevant in different regions, such as ENSO, and the North Atlantic Oscillation (NAO) or Pacific Decadal Oscillation (PDO).</p>
+<p>Below we have used standard metrics that describe the strength of ENSO (<a href="https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php">the ONI</a>) and <a href="https://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/nao.shtml">the NAO index</a>. They are used as co-variates in the (multiple) regression to examine whether they account for variability.</p>
 
 </div>
 </div>
@@ -13141,31 +13157,41 @@ div#notebook {
 <p>Spatially, trends in Q90 Hs appear to more closely follow those of Q50 (compared with the analysis of earlier missions). However, similar features are observed such as the band of weaker or possible negative trends lying further south than for Q50.</p>
 <p>We need to be cautious of whether systematic bias in one or more recent missions (e.g. JASO-2, CRYOSAT-2, HY-2) is responsible for the marked change in trend over recent years. Trend can be evaluated for different "sub-periods" within the record.</p>
 <h3 id="Seasonal:-(ERS-1,-TOPEX,-ERS-2,-GFO-&amp;-JASON-1)">Seasonal: (ERS-1, TOPEX, ERS-2, GFO &amp; JASON-1)<a class="anchor-link" href="#Seasonal:-(ERS-1,-TOPEX,-ERS-2,-GFO-&amp;-JASON-1)">&#182;</a></h3><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JFM_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
-<p>Trends in Q50 Hs based upon January-February-March.</p>
-<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_AMJ_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
-<p>Trends in Q50 Hs based upon April-May-June.</p>
-<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JAS_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
-<p>Trends in Q50 Hs based upon July-August-September.</p>
-<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_OND_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
-<p>Trends in Q50 Hs based upon October-November-December.</p>
-<p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JFND_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
-<p>Trends in Q50 Hs based upon November-December-January-February.</p>
-
+<h4 id="Trends-in-Q50-Hs-based-upon-January-February-March.">Trends in Q50 Hs based upon January-February-March.<a class="anchor-link" href="#Trends-in-Q50-Hs-based-upon-January-February-March.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_AMJ_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<h4 id="Trends-in-Q50-Hs-based-upon-April-May-June.">Trends in Q50 Hs based upon April-May-June.<a class="anchor-link" href="#Trends-in-Q50-Hs-based-upon-April-May-June.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JAS_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<h4 id="Trends-in-Q50-Hs-based-upon-July-August-September.">Trends in Q50 Hs based upon July-August-September.<a class="anchor-link" href="#Trends-in-Q50-Hs-based-upon-July-August-September.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_OND_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<h4 id="Trends-in-Q50-Hs-based-upon-October-November-December.">Trends in Q50 Hs based upon October-November-December.<a class="anchor-link" href="#Trends-in-Q50-Hs-based-upon-October-November-December.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/trend_CI_all_KU_JFND_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1.png"></p>
+<h4 id="Trends-in-Q50-Hs-based-upon-November-December-January-February.">Trends in Q50 Hs based upon November-December-January-February.<a class="anchor-link" href="#Trends-in-Q50-Hs-based-upon-November-December-January-February.">&#182;</a></h4>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span>
-</pre></div>
-
-    </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="9-year-time-slices-(using-4-degree-bins);-1992-2000;-2001-2009;-2010-2018">9 year time slices (using 4 degree bins); 1992-2000; 2001-2009; 2010-2018<a class="anchor-link" href="#9-year-time-slices-(using-4-degree-bins);-1992-2000;-2001-2009;-2010-2018">&#182;</a></h3><p>Firstly, consider the trend evaluation over the entire record (Q90 ONLY!! Q50 disappeared somewhere):</p>
+<p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_all_KU_annual_Q90_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_KU-all_annual.png"></p>
+<p>We now look at the difference in trends in $H_s$ in different parts of the record; 1992-2000; 2001-2009; 2010-2018. In each case, all available satellite data was used, with the exception of Jason-3 and Sentinel-3 that provide only 2017-2018. The figures below show the trend computed based upon annual data. Substantially different patterns can be seen in all cases suggesting that interannual and decadal variability is very high.</p>
+<p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_ERS-1_TOPEX_ERS-2_GFO_1992-2000_annual.png"></p>
+<h4 id="Annual-Q50-(1992-2000)">Annual Q50 (1992-2000)<a class="anchor-link" href="#Annual-Q50-(1992-2000)">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q90_ERS-1_TOPEX_ERS-2_GFO_1992-2000_annual.png"></p>
+<h4 id="Annual-Q90-(1992-2000)">Annual Q90 (1992-2000)<a class="anchor-link" href="#Annual-Q90-(1992-2000)">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_2001-2009_annual.png"></p>
+<h4 id="Annual-Q50-(2001-2009)">Annual Q50 (2001-2009)<a class="anchor-link" href="#Annual-Q50-(2001-2009)">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q90_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_2001-2009_annual.png"></p>
+<h4 id="Annual-Q90-(2001-2009)">Annual Q90 (2001-2009)<a class="anchor-link" href="#Annual-Q90-(2001-2009)">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_2010-2018_annual_.png"></p>
+<h4 id="Annual-Q50-(2010-2018)">Annual Q50 (2010-2018)<a class="anchor-link" href="#Annual-Q50-(2010-2018)">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q90_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_2010-2018_annual_.png"></p>
+<h4 id="Annual-Q90-(2010-2018)">Annual Q90 (2010-2018)<a class="anchor-link" href="#Annual-Q90-(2010-2018)">&#182;</a></h4>
 </div>
 </div>
-
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Effect-of-ENSO-and-NAO">Effect of ENSO and NAO<a class="anchor-link" href="#Effect-of-ENSO-and-NAO">&#182;</a></h3><p>Here we use a multiple regression where the ONI and NAO indices (in turn) are used together with the temporal variate (the years).</p>
+<p>Compare the figures (i), standard regression, (ii) multiple regression with ONI and (iii) multiple regression with NAO. Observe that the inclusion of the ONI (ii) appears to make little difference to the temporal analysis, whereas the NAO (iii) appears to account for some of the variability (CIs not shown), substantially changing the pattern of the apparent temporal trend.</p>
+<p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_2010-2018_annual_.png"></p>
+<h4 id="i)-Simple-temporal-regression.">i) Simple temporal regression.<a class="anchor-link" href="#i)-Simple-temporal-regression.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_2010-2018_annual_ONI.png"></p>
+<h4 id="ii)-Multiple-regression-including-the-ONI-index.-Note-that-the-ONI-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">ii) Multiple regression including the ONI index. Note that the ONI has been averaged (mean) from the monthly observations provided by NOAA.<a class="anchor-link" href="#ii)-Multiple-regression-including-the-ONI-index.-Note-that-the-ONI-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_2010-2018_annual_NAO.png"></p>
+<h4 id="iii)-Multiple-regression-including-the-NAO-index.-Note-that-the-NAO-index-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">iii) Multiple regression including the NAO index. Note that the NAO index has been averaged (mean) from the monthly observations provided by NOAA.<a class="anchor-link" href="#iii)-Multiple-regression-including-the-NAO-index.-Note-that-the-NAO-index-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">&#182;</a></h4>
+</div>
+</div>
 </div>
     </div>
   </div>
