@@ -1,4 +1,4 @@
-# source("/home/ben/research/NOC/SRS_wave_analysis/analysis/SRS_trend_alldata.R")
+# source("/home/ben/research/NOC/SRS_wave_analysis/analysis/SRS_trend_alldata_mpi.R")
 
 # Script to load multiple datasets from IMOS and obtain summary statistics and annual trend.
 # BT 04/2019
@@ -17,8 +17,11 @@
 # Edit here
 # ----------------------------------------------------------------- #
 
+# Data tpye (KU-all, KU-pass, CU etc).
+   data_type <- "KU-all"
+
 # Specify domain.
-   lon_range <- 140:239
+   lon_range <- 120:239
    #lon_range <- 210:219
    lon_mid <- lon_range+0.5
    lat_range <- 0:59
@@ -26,7 +29,15 @@
    lat_mid <- lat_range+0.5
 
 # Resolution (1 = 1 degree, 2 = 2 degree, etc).
-   res <- 2
+   res <- 4
+
+# Analysis duration (typically the coverage of the chosen missions).
+   #anal_years <- min(mat_valid_dates[,mission_idx]):max(mat_valid_dates[,mission_idx])
+   anal_years <- 2010:2018
+   lab_years <- paste(anal_years[c(1,length(anal_years))],collapse='-')
+
+# Flag for regression.
+   flag_reg <- "ONI"
 
 # Parallelise over the geographic range, by longitude.
 # Parallelise over longitude, divide the range by number of processing cores.
@@ -46,7 +57,7 @@
    mat_lon_grid_idx <- matrix(1:length(lon_range_node),nrow=res)
 
 # Data set selection.
-   mission_idx <- 2:10
+   mission_idx <- 6:10
 
 # Months for analysis.
    flag_annual <- TRUE
@@ -71,6 +82,8 @@
 # Data path.
    data_path <- "/home/ben/research/NOC/SRS_wave_analysis/datasets/IMOS/"
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
+   lab_missions <- paste(vec_datasets[mission_idx],collapse='_')
+
    mat_valid_dates <- cbind(c(1986,1990),c(1992,1995),c(1993,2004),c(1996,2008),c(1999,2007),c(2002,2012),c(2009,2017),c(2011,2017),c(2012,2017),c(2014,2017),c(2016,2017),c(2017,2017))
 
 # File base name.
@@ -86,8 +99,50 @@
       array_filenames <- abind(array_filenames,mat_filenames_sat1,along=3)
    }
 
-# Analysis duration (typically the coverage of the chosen missions).
-   anal_years <- min(mat_valid_dates[,mission_idx]):max(mat_valid_dates[,mission_idx])
+#-----------------------------------------------------------------------#
+# Load index data (ONI, NAO).
+#-----------------------------------------------------------------------#
+# ONI.
+   df_ONI <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/ONI.csv")
+# Matrix containing mean, var and "min or max".
+   mat_ONI <- matrix(NA,nrow=dim(df_ONI)[1],ncol=3)
+   mat_ONI[,1] <- apply(X=df_ONI[,2:13],MAR=1,FUN=mean)
+   mat_ONI[,2] <- apply(X=df_ONI[,2:13],MAR=1,FUN=var)
+# Min or max based upon whether the mean is positive or negative.
+   #for (i in 1:dim(df_ONI)[1]) {
+   for (i in 1:69) {
+      if (mat_ONI[i,1] < 0) {
+         mat_ONI[i,3] <- min(df_ONI[i,2:13])
+      } else {
+         mat_ONI[i,3] <- max(df_ONI[i,2:13])
+      }
+   }
+# Column and row names.
+   colnames(mat_ONI) <- c("ONI_mean","ONI_var","ONI_minmax")
+   rownames(mat_ONI) <- df_ONI[,1]
+# ONI range based upon 2018.
+   ONI_years <- which( as.numeric(rownames(mat_ONI)) == anal_years[1] ):which( as.numeric(rownames(mat_ONI)) == 2018 )
+
+# NAO.
+   df_NAO <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/norm.nao.monthly.b5001.current.ascii.table",header=FALSE,sep=',')
+# Matrix containing mean, var and "min or max".
+   mat_NAO <- matrix(NA,nrow=dim(df_NAO)[1],ncol=3)
+   mat_NAO[,1] <- apply(X=df_NAO[,2:13],MAR=1,FUN=mean)
+   mat_NAO[,2] <- apply(X=df_NAO[,2:13],MAR=1,FUN=var)
+# Min or max based upon whether the mean is positive or negative.
+   #for (i in 1:dim(df_NAO)[1]) {
+   for (i in 1:69) {
+      if (mat_NAO[i,1] < 0) {
+         mat_NAO[i,3] <- min(df_NAO[i,2:13])
+      } else {
+         mat_NAO[i,3] <- max(df_NAO[i,2:13])
+      }
+   }
+# Column and row names.
+   colnames(mat_NAO) <- c("NAO_mean","NAO_var","NAO_minmax")
+   rownames(mat_NAO) <- df_ONI[,1]
+# NAO range based upon 2018.
+   NAO_years <- which( as.numeric(rownames(mat_NAO)) == anal_years[1] ):which( as.numeric(rownames(mat_NAO)) == 2018 )
 
 # ================================================================= #
 # Data structures.
@@ -169,15 +224,21 @@
 # Trend (linear regression).
             mat_b_q <- array_annual_stats[,,2]
             colnames(mat_b_q) <- paste("Q",100*vec_q,sep="")
-            df_Q <- data.frame(cbind(year=anal_years,mat_b_q))
+            df_Q <- data.frame(cbind(year=anal_years,mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,]))
 
             mat_trend <- matrix(NA,nrow=length(vec_q),ncol=2)
             for (qq in 1:length(vec_q)) {
 # Catch if lack of data for regression.
                if (!all(is.na(df_Q[,(qq+1)]))) {
-                  lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q)
+                  if (flag_reg == "NAO") {
+                     lm_Q <- lm(df_Q[,(qq+1)] ~ year + NAO_mean,data=df_Q)
+                  } else if (flag_reg == "ONI") {
+                     lm_Q <- lm(df_Q[,(qq+1)] ~ year + ONI_mean,data=df_Q)
+                  } else {
+                     lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q)
+                  }
                   sum_lm_Q <- summary(lm_Q)
-                  mat_trend[qq,] <- c(sum_lm_Q$coefficients[2],sum_lm_Q$coefficients[8])
+                  mat_trend[qq,] <- c(sum_lm_Q$coefficients[2,1],sum_lm_Q$coefficients[2,4])
                }
             }
             colnames(mat_trend) <- c("year_slope","Pr(>|t|)")
@@ -197,7 +258,8 @@
    mat_list_annual_trend <- do.call( cbind, allgather( mat_list_annual_trend_node ) )
 
 # Create data structure including metadata.
-   array_meta <- list(mission_idx=mission_idx,data_name=vec_datasets[mission_idx],time_period=lab_months,
+   array_meta <- list(mission_idx=mission_idx,mission_name=vec_datasets[mission_idx],data_type=data_type,
+                      time_period=lab_months,resolution=res,
                       orig_lat_cell=lat_range, orig_lon_cell=lon_range,
                       lat_cell=matrix(lat_range,nrow=res)[1,],lon_cell=matrix(lon_range,nrow=res)[1,],
                       lat_mid=(matrix(lat_range,nrow=res)[1,] + (res/2)),lon_mid=(matrix(lon_range,nrow=res)[1,] + (res/2)),
@@ -205,7 +267,7 @@
    list_SRS_trend <- list(array_meta,mat_list_annual_trend)
 
 # Write out data.
-   data_file <- paste("./output/mpi_test/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
+   data_file <- paste("./output/",res,"deg/list_trend_",data_type,"_",lab_missions,"_",lab_years,"_",lab_months,"_110_",flag_reg,".Robj",sep="")
    save(list_SRS_trend,file = data_file)
 
    finalize()

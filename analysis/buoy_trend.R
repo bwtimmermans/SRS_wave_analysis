@@ -19,8 +19,12 @@
 # Buoy 46066, 52.785N 155.047W
    #buoy_list <- c("46066")
    #buoy_list <- c("51004")
-   #buoy_list <- c("41002")
-   buoy_list <- c("46006")
+   buoy_list <- c("41002")
+   #buoy_list <- c("46006")
+
+# Averaging flag.
+   #flag_av <- "24hr"
+   flag_av <- "6hr"
 
 #-----------------------------------------------------------------------#
 # Buoy data.
@@ -67,9 +71,6 @@
 # Quantiles for 
    q_plot <- quantile(hist_buoy_hs,probs=c(0.5,0.9),na.rm=T)
 
-#-----------------------------------------------------------------------#
-# Trend based upon annual data.
-#-----------------------------------------------------------------------#
 # Bin data by year.
    if (mat_buoy_obs[3,1] < 100) {
       start_year <- mat_buoy_obs[3,1] + 1900
@@ -77,25 +78,116 @@
       start_year <- mat_buoy_obs[3,1]
    }
    seq_years <- start_year:2018
+
+#-----------------------------------------------------------------------#
+# Load index data (ONI, NAO).
+#-----------------------------------------------------------------------#
+# ONI.
+   df_ONI <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/ONI.csv")
+# Matrix containing mean, var and "min or max".
+   mat_ONI <- matrix(NA,nrow=dim(df_ONI)[1],ncol=3)
+   mat_ONI[,1] <- apply(X=df_ONI[,2:13],MAR=1,FUN=mean)
+   mat_ONI[,2] <- apply(X=df_ONI[,2:13],MAR=1,FUN=var)
+# Min or max based upon whether the mean is positive or negative.
+   #for (i in 1:dim(df_ONI)[1]) {
+   for (i in 1:69) {
+      if (mat_ONI[i,1] < 0) {
+         mat_ONI[i,3] <- min(df_ONI[i,2:13])
+      } else {
+         mat_ONI[i,3] <- max(df_ONI[i,2:13])
+      }
+   }
+# Column and row names.
+   colnames(mat_ONI) <- c("ONI_mean","ONI_var","ONI_minmax")
+   rownames(mat_ONI) <- df_ONI[,1]
+# ONI range based upon 2018.
+   ONI_years <- which( as.numeric(rownames(mat_ONI)) == start_year ):which( as.numeric(rownames(mat_ONI)) == 2018 )
+
+# NAO.
+   df_NAO <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/norm.nao.monthly.b5001.current.ascii.table",header=FALSE, sep=',')
+# Matrix containing mean, var and "min or max".
+   mat_NAO <- matrix(NA,nrow=dim(df_NAO)[1],ncol=3)
+   mat_NAO[,1] <- apply(X=df_NAO[,2:13],MAR=1,FUN=mean)
+   mat_NAO[,2] <- apply(X=df_NAO[,2:13],MAR=1,FUN=var)
+# Min or max based upon whether the mean is positive or negative.
+   #for (i in 1:dim(df_NAO)[1]) {
+   for (i in 1:69) {
+      if (mat_NAO[i,1] < 0) {
+         mat_NAO[i,3] <- min(df_NAO[i,2:13])
+      } else {
+         mat_NAO[i,3] <- max(df_NAO[i,2:13])
+      }
+   }
+# Column and row names.
+   colnames(mat_NAO) <- c("NAO_mean","NAO_var","NAO_minmax")
+   rownames(mat_NAO) <- df_ONI[,1]
+# NAO range based upon 2018.
+   NAO_years <- which( as.numeric(rownames(mat_NAO)) == start_year ):which( as.numeric(rownames(mat_NAO)) == 2018 )
+
+#-----------------------------------------------------------------------#
+# Trend based upon annual data.
+#-----------------------------------------------------------------------#
    list_years <- list(length(seq_years))
    for (yy in 1:length(seq_years)) {
       if ( seq_years[yy] <= 1998 ) {
-         hs_temp <- hist_buoy_hs[which(mat_buoy_obs[,1] == (seq_years[yy]-1900))]
-         list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+         #hs_temp <- hist_buoy_hs[which(mat_buoy_obs[,1] == (seq_years[yy]-1900))]
+         #list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+         list_years[[yy]] <- hist_buoy_hs[which(mat_buoy_obs[,1] == (seq_years[yy]-1900))]
       } else {
-         hs_temp <- hist_buoy_hs[which(mat_buoy_obs[,1] == seq_years[yy])]
-         list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+         #hs_temp <- hist_buoy_hs[which(mat_buoy_obs[,1] == seq_years[yy])]
+         #list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+         list_years[[yy]] <- hist_buoy_hs[which(mat_buoy_obs[,1] == seq_years[yy])]
       }
    }
 
 # Take fixed daily mean.
-   hs_temp_resid <- NULL
-   mat_day_idx <- cbind(seq(1,,24,400),seq(24,,24,400))
+   #hs_temp_resid <- NULL
+   year_q_flag <- logical(length(seq_years))
+   year_q_flag[1:length(seq_years)] <- TRUE
+
+# Averaging.
+   if (flag_av == "24hr") {
+# 24 hour averaging.
+      mat_day_idx <- cbind(seq(1,,24,400),seq(24,,24,400))
+      mat_day_idx_2016 <- cbind(seq(1,,144,2400),seq(144,,144,2400))
+      qual_thresh <- 274
+      lab_av <- "24 hr mean"
+   } else if (flag_av == "6hr") {
+# 6 hour averaging.
+      mat_day_idx <- cbind(seq(1,,6,1600),seq(6,,6,1600))
+      mat_day_idx_2016 <- cbind(seq(1,,36,2400),seq(36,,36,2400))
+      qual_thresh <- 4*274
+      lab_av <- "6 hr mean"
+   }
+
    for (yy in 1:length(seq_years)) {
-      hs_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]]) })
-      hs_temp_resid_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { list_years[[yy]][x[1]:x[2]] - median(list_years[[yy]][x[1]:x[2]]) })
-      hs_temp_resid <- c(hs_temp_resid,hs_temp_resid_temp[!is.na(hs_temp_resid_temp)])
-      list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+      if (buoy_name == 46006 & seq_years[yy] >= 2016) {
+         hs_temp <- apply(X=mat_day_idx_2016,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]],na.rm=T) })
+         list_years[[yy]] <- hs_temp[!is.nan(hs_temp)]
+         if (length(list_years[[yy]]) < qual_thresh) {
+            year_q_flag[yy] <- FALSE
+         }
+      } else if (buoy_name == 41002 & seq_years[yy] >= 2018) {
+         hs_temp <- apply(X=mat_day_idx_2016,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]],na.rm=T) })
+         list_years[[yy]] <- hs_temp[!is.nan(hs_temp)]
+         if (length(list_years[[yy]]) < qual_thresh) {
+            year_q_flag[yy] <- FALSE
+         }
+      } else if (buoy_name == 51004 & seq_years[yy] >= 2018) {
+         hs_temp <- apply(X=mat_day_idx_2016,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]],na.rm=T) })
+         list_years[[yy]] <- hs_temp[!is.nan(hs_temp)]
+         if (length(list_years[[yy]]) < qual_thresh) {
+            year_q_flag[yy] <- FALSE
+         }
+      } else {
+         hs_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { mean(list_years[[yy]][x[1]:x[2]],na.rm=T) })
+         #hs_temp_resid_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { list_years[[yy]][x[1]:x[2]] - median(list_years[[yy]][x[1]:x[2]]) })
+         #hs_temp_resid <- c(hs_temp_resid,hs_temp_resid_temp[!is.na(hs_temp_resid_temp)])
+         list_years[[yy]] <- hs_temp[!is.na(hs_temp)]
+         if (length(list_years[[yy]]) < qual_thresh) {
+            year_q_flag[yy] <- FALSE
+         }
+      }
    }
 
 ## Take moving daily average.
@@ -112,22 +204,27 @@
    vec_q <- c(0.5,0.9,0.95)
    mat_b_q <- t(sapply(X=list_years,FUN=quantile,probs=vec_q,na.rm=T))
    colnames(mat_b_q) <- paste("Q",100*c(0.5,0.9,0.95),sep="")
-   df_Q <- data.frame(cbind(year=seq_years,mat_b_q))
+   df_Q_temp <- data.frame(cbind(year=seq_years,mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,]))
+   df_Q <- df_Q_temp[year_q_flag,]
 # Estimate CIs.
-   array_q_CI <- array(0,dim=c(length(seq_years),2,length(vec_q)))
+   array_q_CI_temp <- array(0,dim=c(length(seq_years),2,length(vec_q)))
    for (qq in 1:length(vec_q)) {
-      array_q_CI[,,qq] <- t(sapply(X=list_years,FUN=function(x) { sort(x)[quantile.CI(length(x),q=vec_q[qq])$Interval] }))
+      array_q_CI_temp[,,qq] <- t(sapply(X=list_years,FUN=function(x) { sort(x)[quantile.CI(length(x),q=vec_q[qq])$Interval] }))
    }
+   array_q_CI <- array_q_CI_temp[year_q_flag,,]
 # Weights for weighted least squares.
    vec_CI_w <- ( max(array_q_CI[,1,qq],na.rm=T)/array_q_CI[,1,qq] + max(array_q_CI[,2,qq],na.rm=T)/array_q_CI[,2,qq] ) / 2
    vec_CI_w[is.na(vec_CI_w)] <- 1
 
-   fig_file_name <- paste("./figures/",buoy_name,"_annual_trend.png",sep="")
+   file_lab_av <- paste(strsplit(lab_av,split=' ')[[1]][1:2],collapse='')
+   fig_file_name <- paste("./figures/buoy_trends/",buoy_name,"_QA_annual_",file_lab_av,".png",sep="")
    #X11()
    png(filename = fig_file_name, width = 2200, height = 2200)
    par(mfrow=c(2,2),oma=c(1.5,1.5,3,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
    for (qq in 1:length(vec_q)) {
-      lm_Q <- lm(df_Q[,(qq+1)] ~ year,data=df_Q,weights=vec_CI_w)
+      #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q,weights=vec_CI_w)
+      lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
+      #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year + ONI_minmax,data=df_Q)
       sum_lm_Q <- summary(lm_Q)
       print(summary(lm_Q))
 
@@ -135,14 +232,14 @@
       arrows(df_Q$year, array_q_CI[,1,qq], df_Q$year, array_q_CI[,2,qq], length=0.05, angle=90, code=3, lwd=2)
       abline(lm_Q,lwd=3)
 
-      if ( sum_lm_Q$coefficients[8] < 0.1 ) {
-         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2],digits=2),"m per year. Significant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[8],digits=2),sep="")
+      if ( sum_lm_Q$coefficients[2,4] < 0.1 ) {
+         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nSignificant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")
       } else {
-         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2],digits=2),"m per year. Not significant, Pr(>|t|) = ",format(sum_lm_Q$coefficients[8],digits=2),sep="")
+         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nNot significant, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")
       }
-      mtext(text = trend_sig, side = 3, line = -5, cex = 3)
+      mtext(text = trend_sig, side = 3, line = -8, cex = 3)
    }
-   mtext(text = paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name), outer = TRUE, side = 3, line = -2, cex = 4)
+   mtext(text = paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")",sep=''), outer = TRUE, side = 3, line = -2, cex = 4)
    dev.off()
    system(paste("okular",fig_file_name,"&> /dev/null &"))
    

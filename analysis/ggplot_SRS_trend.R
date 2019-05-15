@@ -9,11 +9,25 @@
 
 #-------------------------------------------------------#
 # Missions.
-   mission_idx <- 2:10
+   mission_idx <- 6:10
+
+# Resolution.
+   res <- 4
+
+# Data type.
+   data_type <- "KU-all"
+
+# Years.
+   lab_years <- "2010-2018"
+
+# Season.
    lab_months <- "JFMAMJ"
    lab_months <- "JASOND"
    lab_months <- "JFND"
    lab_months <- "annual"
+
+# Flag for regression.
+   flag_reg <- "ONI"
 
 # Read analysis data (amtrix of lists).
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
@@ -21,7 +35,9 @@
    #data_path <- paste("./output/test_block/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend.Robj",sep="")
    #data_path <- paste("./output/all_KU/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
 # MPI.
-   data_path <- paste("./output/mpi_test/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
+   #data_path <- paste("./output/mpi_test/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
+# Resolution based.
+   data_path <- paste("./output/",res,"deg/list_trend_",data_type,"_",paste(vec_datasets[mission_idx],collapse='_'),"_",lab_years,"_",lab_months,"_110_",flag_reg,".Robj",sep="")
 
 # Matrix to hold datasets.
    attach(data_path[1])
@@ -31,7 +47,7 @@
 # Set up data structures.
    mat_plot_data <- matrix(NA,nrow=length(attached_data[[1]]$lat_cell),ncol=length(attached_data[[1]]$lon_cell))
    mat_plot_CI <- matrix(NA,nrow=length(attached_data[[1]]$lat_cell),ncol=length(attached_data[[1]]$lon_cell))
-   lab_dataset <- attached_data[[1]]$data_name
+   lab_dataset <- attached_data[[1]]$mission_name
    lat_mid <- attached_data[[1]]$lat_mid
    lon_mid <- attached_data[[1]]$lon_mid
    lab_stats <- attached_data[[1]]$trend_stats
@@ -41,7 +57,7 @@
 # 1: Q50
 # 2: Q90
 # 3: Q95
-   stat_idx <- 2
+   stat_idx <- 1
    list_data <- attached_data[[2]]
 
 # list_SRS_trend dimensions:
@@ -66,7 +82,7 @@
 #-------------------------------------------------------#
 # Set up data frame for ggplot.
    df_plot <- NULL
-   plot_labels <- paste(paste(lab_dataset,collapse=', '),": Temporal trend in ",lab_stats[stat_idx]," (",lab_period," KU-band)",sep="")
+   plot_labels <- paste(lab_years," (",paste(lab_dataset,collapse=', '),"): ",flag_reg," Trend ",lab_stats[stat_idx]," (",lab_period," KU)",sep="")
    for (k in 1:1) {
       df_plot <- rbind( df_plot,
                             cbind( expand.grid( lat=rev(lat_mid), lon=lon_mid ), plot_stat=as.vector(mat_plot_data), plot_CI=as.vector(mat_plot_CI), anal=plot_labels[k] )
@@ -85,12 +101,20 @@
       #plot_breaks_lo <- 0.9*min(df_plot$plot_stat,na.rm=T)
       #plot_breaks_hi <- 1.1*max(df_plot$plot_stat,na.rm=T)
       #col_breaks <- seq(plot_breaks_lo,plot_breaks_hi,500)
-      col_breaks <- seq(-0.04,0.04,0.01)
+      col_lim <- 0.08
+      col_breaks <- seq(-col_lim,col_lim,0.01)
       #plot_lims <- c(0.95*min(df_plot$plot_stat,na.rm=T),1.05*max(df_plot$plot_stat,na.rm=T))
-      plot_lims <- c(-0.04,0.04)
-   } else if ( stat_idx == 2 | stat_idx == 3 ) {
-      col_breaks <- seq(-0.07,0.07,0.01)
-      plot_lims <- c(-0.075,0.075)
+      plot_lims <- c(-col_lim,col_lim)
+   } else if ( stat_idx == 2 ) {
+      col_breaks <- seq(-0.15,0.15,0.03)
+      plot_lims <- c(-0.15,0.15)
+      #col_breaks <- seq(-max(df_plot$plot_stat,na.rm=T),max(df_plot$plot_stat,na.rm=T),0.01)
+      #plot_lims <- c(-max(df_plot$plot_stat,na.rm=T),max(df_plot$plot_stat,na.rm=T))
+   } else if ( stat_idx == 3 ) {
+      col_breaks <- seq(-0.15,0.15,0.03)
+      plot_lims <- c(-0.15,0.15)
+      #col_breaks <- seq(-max(df_plot$plot_stat,na.rm=T),max(df_plot$plot_stat,na.rm=T),0.01)
+      #plot_lims <- c(-max(df_plot$plot_stat,na.rm=T),max(df_plot$plot_stat,na.rm=T))
    }
 
 # Chi plot.
@@ -142,7 +166,8 @@
 
 # Include blank panels.
    #fig_file_name <- paste("./figures/SRS_trends/trend_CI_block_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),".png",sep="")
-   fig_file_name <- paste("./figures/SRS_trends/trend_CI_all_KU_",lab_months,"_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),"_mpi.png",sep="")
+   #fig_file_name <- paste("./figures/SRS_trends/trend_CI_all_KU_",lab_months,"_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),"_mpi.png",sep="")
+   fig_file_name <- paste("./figures/SRS_trends/",res,"deg/trend_CI_",data_type,"_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),"_",lab_years,"_",lab_months,"_",flag_reg,".png",sep="")
    png(filename = fig_file_name, width = 2400, height = 1300)
    plot(p1)
    dev.off()
