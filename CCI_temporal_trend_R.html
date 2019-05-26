@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="utf-8" />
 
-<title>SRS_wave_analysis_R</title>
+<title>CCI_temporal_trend_R</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -13116,24 +13116,9 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">An analysis of IMOS SRS ocean wave height satellite observation dataset.<a class="anchor-link" href="#An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">&#182;</a></h1><h2 id="Project-contents">Project contents<a class="anchor-link" href="#Project-contents">&#182;</a></h2><p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary (this page)</a></b></p>
-
-<pre><code>An overview of the components of the research, including reference material.
-
-</code></pre>
-<p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/SRS_temporal_trend_R.html>Satellite temporal trends</a></b></p>
-
-<pre><code>Examination of temporal trends in satellite observations of wave height (Ribal &amp; Young data set).
-
-</code></pre>
-<p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/CCI_temporal_trend_R.html>Satellite temporal trends (CCI)</a></b></p>
-
-<pre><code>Examination of temporal trends in satellite observations of wave height (CCI L4 data set).
-
-</code></pre>
-<p><li><b><a href=https://bwtimmermans.github.io/SRS_wave_analysis/quantile_estimation_R.html>Quantile estimation</a></b></p>
-
-<pre><code>A description of issues assocaited with quantile estimation and some methods.</code></pre>
+<h1 id="Project-summary">Project summary<a class="anchor-link" href="#Project-summary">&#182;</a></h1><h3>Please visit project summary here: <a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary</a></h3>
+<h1 id="Exploration-of-temporal-trends-in-CCI-L4-dataset">Exploration of temporal trends in CCI L4 dataset<a class="anchor-link" href="#Exploration-of-temporal-trends-in-CCI-L4-dataset">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>THe CCI L4 dataset spans 1992 to 2018. In contrast to the Young dataset, it provides a range of summary statistics, as opposed to the entire collection of track observations from each mission and instrument.</p>
+<p>Here we evaluate the temporal trend based upon the monthly statistics provided.</p>
 
 </div>
 </div>
@@ -13141,17 +13126,16 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="References">References<a class="anchor-link" href="#References">&#182;</a></h1><h3 id="Dataset-and-production">Dataset and production<a class="anchor-link" href="#Dataset-and-production">&#182;</a></h3><p><a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a> describe the production of the data base.
-Products analyzed here were obtained from: <a href=http://thredds.aodn.org.au/thredds/catalog/IMOS/SRS/Surface-Waves/Wave-Wind-Altimetry-DM00/catalog.html>http://thredds.aodn.org.au/thredds/catalog/IMOS/SRS/Surface-Waves/Wave-Wind-Altimetry-DM00/catalog.html</a></p>
-<p><a href=https://journals.ametsoc.org/doi/full/10.1175/JTECH-D-16-0145.1>Calibration and Cross Validation of a Global Wind and Wave Database of Altimeter, Radiometer, and Scatterometer Measurements, Young et al. (2017)</a> describe some details of their findings when calibrating and comparing observations of wave heights from a range of data sources.</p>
-<h3 id="Trends-in-wave-height">Trends in wave height<a class="anchor-link" href="#Trends-in-wave-height">&#182;</a></h3><p><a href=https://www.jcronline.org/doi/pdf/10.2112/07-0894.1>Increasing Hurricane-Generated Wave Heights along the U.S. East Coast and Their Climate Controls, Komar and Allan</a></p>
-<p><a href=https://www.sciencedirect.com/science/article/pii/S1463500309002066>Dodet et al. 2010, Wave climate variability in the North-East Atlantic Ocean over the last six decades, Ocean Modelling Volume 31, Issues 3–4, 2010, Pages 120-131</a></p>
-<h3 id="Trends-in-extreme-wave-height">Trends in extreme wave height<a class="anchor-link" href="#Trends-in-extreme-wave-height">&#182;</a></h3><p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2008GL035394>Menendez et al. 2008, Variability of extreme wave heights in the northeast Pacific Oceanbased on buoy measurements, GRL</a></p>
-<p><a href=https://www.jcronline.org/doi/abs/10.2112/07-0894.1>Paul D. Komar and Jonathan C. Allan (2008) Increasing Hurricane-Generated Wave Heights along the U.S. East Coast and Their Climate Controls. Journal of Coastal Research: Volume 24, Issue 2: pp. 479 – 488</a></p>
-<p><a href=https://www.sciencedirect.com/science/article/pii/S0029801807001886>Méndez, et al. 2008, Seasonality and duration in extreme value distributions of significant wave height, Ocean Engineering Volume 35, Issue 1, January 2008, Pages 131-138</a></p>
-<h3 id="Hindcasts">Hindcasts<a class="anchor-link" href="#Hindcasts">&#182;</a></h3><p><a href=https://www.sciencedirect.com/science/article/pii/S0378383917300443>Perez et al. GOW2: A global wave hindcast for coastal applications, Coastal Engineering</a></p>
-<h3 id="Projections-and-wave-climate-general">Projections and wave climate general<a class="anchor-link" href="#Projections-and-wave-climate-general">&#182;</a></h3><p><a href=https://www.sciencedirect.com/science/article/pii/S1463500315001134>Erikson et al. 2015, Projected wave conditions in the Eastern North Pacific under the influence of two CMIP5 climate scenarios</a></p>
-<p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016GL071681>Timmermans et al. (2017)</a> describe the characteristics of simulated wave climate at different resolution, and provide some comparisons of simulated wind and wave height data with observations.</p>
+<h2 id="Long-term-trend-in-mean">Long term trend in mean<a class="anchor-link" href="#Long-term-trend-in-mean">&#182;</a></h2><p><i>Code: CCI_trend_alldata_mpi.R; ggplot_CCI_trend.R</i></p>
+<p>Here we aggregate monthly mean $H_s$ to annual data for every 4 degrees spatially. We fit a linear regression to establish a long term trend as before.</p>
+<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_none.png"></p>
+<p>We can also re-centre the year around the Boreal winter, i.e. aggregating data from July to June rather than January to December.</p>
+<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_winter_none.png"></p>
+<p>The results do not change substantially in the two cases.</p>
+<h2 id="Seasonal">Seasonal<a class="anchor-link" href="#Seasonal">&#182;</a></h2><h3 id="Trends-in-mean-Hs-based-upon-November-December-January-February.">Trends in mean Hs based upon November-December-January-February.<a class="anchor-link" href="#Trends-in-mean-Hs-based-upon-November-December-January-February.">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_JFND_n_summer_none.png"></p>
+<p>The only substanial positive long term trend appears to be in the Southern Ocean, particularly evident in Austral winter. Also of note is the clear negative trend that spans most of the North Pacific.</p>
+<h3 id="Trends-in-mean-Hs-based-upon-AMJJAS.">Trends in mean Hs based upon AMJJAS.<a class="anchor-link" href="#Trends-in-mean-Hs-based-upon-AMJJAS.">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_AMJJAS_n_summer_none.png"></p>
+<p>A strong negative trend is evident that covers much of the Indian Ocean. It is particularly evident in Boreal winter.</p>
 
 </div>
 </div>
@@ -13159,10 +13143,10 @@ Products analyzed here were obtained from: <a href=http://thredds.aodn.org.au/th
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Statistical-considerations">Statistical considerations<a class="anchor-link" href="#Statistical-considerations">&#182;</a></h1><h3 id="Uncertainty-estimation-for-quantiles">Uncertainty estimation for quantiles<a class="anchor-link" href="#Uncertainty-estimation-for-quantiles">&#182;</a></h3><p>The approach to estimating confidence intervals on, for example, the median (Q50), is described here.</p>
-<h3 id="Pairwise-metrics-under-misaligned-observations">Pairwise metrics under misaligned observations<a class="anchor-link" href="#Pairwise-metrics-under-misaligned-observations">&#182;</a></h3><p>Paired observations are required in order to compute various useful metrics, such as correlation or covariance, rather than a simple difference in mean, for example. For satellite observations along tracks, this raises an interesting problem, because observations along tracks (i.e. ptemporally periodic along a fixed path), rarely coincide closely (in a spatiotemporal sense) with observations made at a fixed location, such as a moored buoy.</p>
-<p>The loss of shared information in this setup depends strongly on the spatiotemporal variability of the observed quantity &#8212; in this case typically $H_s$. Many studies involving the comparison of wave height data from buoys and satellite retrieval (e.g. <a href=https://journals.ametsoc.org/doi/full/10.1175/JTECH-D-16-0145.1>Young et al., 2017)</a> use a "match-up" criteria based upon a limiting 30 minute window and 50 km spatial separation. However, this could be clearly problematic if match-ups with the largest deviations are given equal weight in a calculation, to those with zero deviation.</p>
-<p><a href="https://stats.stackexchange.com/questions/221246/such-thing-as-a-weighted-correlation">https://stats.stackexchange.com/questions/221246/such-thing-as-a-weighted-correlation</a></p>
+<h3 id="Interannual-variaiblity-(9-year-time-slices);-1992-2000;-2001-2009;-2010-2018">Interannual variaiblity (9 year time slices); 1992-2000; 2001-2009; 2010-2018<a class="anchor-link" href="#Interannual-variaiblity-(9-year-time-slices);-1992-2000;-2001-2009;-2010-2018">&#182;</a></h3><p>Substantial interdecadal variability is clear in all oceanic basins, between the different time slices.</p>
+<h4 id="Annual-mean-(1992-2000)">Annual mean (1992-2000)<a class="anchor-link" href="#Annual-mean-(1992-2000)">&#182;</a></h4><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2000_annual_n_summer_none.png"></p>
+<h4 id="Annual-mean-(2001-2009)">Annual mean (2001-2009)<a class="anchor-link" href="#Annual-mean-(2001-2009)">&#182;</a></h4><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_2001-2009_annual_n_summer_none.png"></p>
+<h4 id="Annual-mean-(2010-2018)">Annual mean (2010-2018)<a class="anchor-link" href="#Annual-mean-(2010-2018)">&#182;</a></h4><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_2010-2018_annual_n_summer_none.png"></p>
 
 </div>
 </div>
@@ -13170,89 +13154,14 @@ Products analyzed here were obtained from: <a href=http://thredds.aodn.org.au/th
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Data-summary">Data summary<a class="anchor-link" href="#Data-summary">&#182;</a></h1><p>Observations of $H_s$ are provided for each mission, and binned into $1 \times 1^\circ$ grid cells. All measurements along the track that intersects the grid cell are included, typically up to about 12 measurements. This includes observations from both KU- and C-band where available.</p>
-<p><img src="./figures/ribal_missions.png">
-Figure 2 from Ribal and Young (2019) shows the temporal coincidence of missions.</p>
+<h3 id="Effect-of-ENSO-and-NAO">Effect of ENSO and NAO<a class="anchor-link" href="#Effect-of-ENSO-and-NAO">&#182;</a></h3><p>As for the Young product, here we use a multiple regression where the ONI and NAO indices (in turn) are used together with the temporal variate (the years).</p>
+<p>Firstly, the ONI and NAO do not appear to account for any variability over the entire length of the record, as shown in the following figures.</p>
+<h4 id="i)-Temporal-regression-(1992---2018).">i) Temporal regression (1992 - 2018).<a class="anchor-link" href="#i)-Temporal-regression-(1992---2018).">&#182;</a></h4><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_none.png"></p>
+<h4 id="ii)-Multiple-regression-including-the-ONI-index.-Note-that-the-ONI-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">ii) Multiple regression including the ONI index. Note that the ONI has been averaged (mean) from the monthly observations provided by NOAA.<a class="anchor-link" href="#ii)-Multiple-regression-including-the-ONI-index.-Note-that-the-ONI-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">&#182;</a></h4><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_ONI.png"></p>
+<h4 id="iii)-Multiple-regression-including-the-NAO-index.-Note-that-the-NAO-index-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">iii) Multiple regression including the NAO index. Note that the NAO index has been averaged (mean) from the monthly observations provided by NOAA.<a class="anchor-link" href="#iii)-Multiple-regression-including-the-NAO-index.-Note-that-the-NAO-index-has-been-averaged-(mean)-from-the-monthly-observations-provided-by-NOAA.">&#182;</a></h4><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_NAO.png"></p>
 
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Characteristics-of-the-wave-climate">Characteristics of the wave climate<a class="anchor-link" href="#Characteristics-of-the-wave-climate">&#182;</a></h2><p>Simulations of ocean waves from a simulated atmosphere at $\sim$25 km global resolution
-<a href=https://www.youtube.com/watch?v&#61;k9NqhLqKhWQ> can be seen here</a>. Region-by-region, and season-by-season circulation patterns can be seen that govern ocean wave conditions. For example, waves in the northern Pacific and northern Atlantic tend to be driven by large scale circulation blowing from the west. In contrast the tropics are affected seasonally by tropical cyclones that may be much more geospatially compact.</p>
-<p><img src="./figures/buoy_map.png"></p>
-<h4 id="Figure:-NDBC-data-buoys-considered-in-Timmermans-et-al.-2017.">Figure: NDBC data buoys considered in Timmermans et al. 2017.<a class="anchor-link" href="#Figure:-NDBC-data-buoys-considered-in-Timmermans-et-al.-2017.">&#182;</a></h4><p>Buoys indicated in the above figure can be used for direct comparison. Here we take a look at <b>46066, 51004 and 41002</b>. These three buoys lie in reqions affected by different types of atmospheric flows, and thus provide a sense of performance of the satellite product in each region. Note however that since the SRS product has (likely?) been calibrated against these buoys, we expect to see good agreement.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Exploratory-analysis-of-satellite-data">Exploratory analysis of satellite data<a class="anchor-link" href="#Exploratory-analysis-of-satellite-data">&#182;</a></h1><h2 id="Comparison-with-buoy-observations">Comparison with buoy observations<a class="anchor-link" href="#Comparison-with-buoy-observations">&#182;</a></h2><p><i>Code: qqplot_SRS_46066.R</i></p>
-<p>The global product provides the (calibrated) satellite observations "pre-binned" into geospatial grid cells of $1^\circ \times 1^\circ$. Therefore, without any further sub-sampling a rapid, if somewhat crude, comparison of the sampled distribution of $H_s$ can be made with data buoy observations through a Q-Q plot.</p>
-<p><img src="./analysis/figures/46066_5678_annual.png"></p>
-<h4 id="Figures:-QQ-plots-of-four-missions-at-46066.-All-KU-band-observations.">Figures: QQ plots of four missions at 46066. All KU-band observations.<a class="anchor-link" href="#Figures:-QQ-plots-of-four-missions-at-46066.-All-KU-band-observations.">&#182;</a></h4><p><img src="./analysis/figures/46066_5678_annual_block.png"></p>
-<h4 id="Figures:-QQ-plots-of-four-missions-at-46066.-Averaged-(mean)-KU-band-observations.">Figures: QQ plots of four missions at 46066. Averaged (mean) KU-band observations.<a class="anchor-link" href="#Figures:-QQ-plots-of-four-missions-at-46066.-Averaged-(mean)-KU-band-observations.">&#182;</a></h4><p>In the figure above, Q50 (the median, ~2.5m) is marked by the dashed red lines. Although small in absolute terms (~10 cm) statistically significant discrepancies can be seen. Note that NDBC 46066 covers the period 2000-2018, so JASON-1 (2002-2013) coincides most completely.</p>
-<p><img src="./analysis/figures/51004_5678_annual.png"></p>
-<h4 id="Figure:-QQ-plots-of-four-missions-at-51004.-All-KU-band-observations.">Figure: QQ plots of four missions at 51004. All KU-band observations.<a class="anchor-link" href="#Figure:-QQ-plots-of-four-missions-at-51004.-All-KU-band-observations.">&#182;</a></h4><p><img src="./analysis/figures/51004_5678_annual_block.png"></p>
-<h4 id="Figures:-QQ-plots-of-four-missions-at-51004.-Averaged-(mean)-KU-band-observations.">Figures: QQ plots of four missions at 51004. Averaged (mean) KU-band observations.<a class="anchor-link" href="#Figures:-QQ-plots-of-four-missions-at-51004.-Averaged-(mean)-KU-band-observations.">&#182;</a></h4>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Co-location-analysis">Co-location analysis<a class="anchor-link" href="#Co-location-analysis">&#182;</a></h1><p><i>Code: qqplot_SRS_buoy.R</i></p>
-<p>The earlier Q-Q plots were constructed on the (clearly incorrect) assumptions that the buoy and satellite observations were perfectly coincident in space and time. The satellite tracks were constrained to a $1^\circ \times 1^\circ$ cell which could result in ~100 km spatial discrepancy between buoy and track. In order to examine the distribution of "residuals" more closely</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Spatial-summary-statitics">Spatial summary statitics<a class="anchor-link" href="#Spatial-summary-statitics">&#182;</a></h1><p><i>Code: IMOS_stats.R; ggplot_stats.R</i></p>
-<h4 id="Missions:">Missions:<a class="anchor-link" href="#Missions:">&#182;</a></h4><p><li><b>ERS-2</b></p>
-<p><li><b>GFO</b></p>
-<p><li><b>ENVISAT</b></p>
-<p><li><b>JASON-2</b></p>
-<p>Summary statistics are obtained from the complete KU-band data for each product, by grid cell, over a region of the northern Pacific. "raw_counts" refers to the total number of observations included in the product (per grid cell, no averaging or correction), QXX referes to XX quantile value. In addition, Q50 is also derived from Q50 from each pass (per grid cell), rather than the total data.</p>
-<p>Note considerable variation in number of observation both between missions, and between grid cells. JASON-2 in particular seems to suffer quite badly from sampling artifacts. (I have no idea what is going on with ERS-2 in the eastern Pacific.)</p>
-<p><img src="./analysis/figures/ERS-2_raw_counts.png"></p>
-<p><img src="./analysis/figures/ERS-2_Q50.png"></p>
-<p><img src="./analysis/figures/ERS-2_Q50_Q50-pass.png"></p>
-<p><img src="./analysis/figures/ERS-2_Q95.png"></p>
-<p><img src="./analysis/figures/GFO_raw_counts.png"></p>
-<p><img src="./analysis/figures/GFO_Q50.png"></p>
-<p><img src="./analysis/figures/GFO_Q50_Q50-pass.png"></p>
-<p><img src="./analysis/figures/GFO_Q95.png"></p>
-<p><img src="./analysis/figures/ENVISAT_raw_counts.png"></p>
-<p><img src="./analysis/figures/ENVISAT_Q50.png"></p>
-<p><img src="./analysis/figures/ENVISAT_Q50_Q50-pass.png"></p>
-<p><img src="./analysis/figures/ENVISAT_Q95.png"></p>
-<p><img src="./analysis/figures/JASON-2_raw_counts.png"></p>
-<p><img src="./analysis/figures/JASON-2_Q50.png"></p>
-<p><img src="./analysis/figures/JASON-2_Q50_Q50-pass.png"></p>
-<p><img src="./analysis/figures/JASON-2_Q95.png"></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
 </div>
     </div>
   </div>
