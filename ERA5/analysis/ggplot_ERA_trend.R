@@ -1,4 +1,4 @@
-# source("/home/ben/research/NOC/SRS_wave_analysis/CCI/analysis/ggplot_CCI_trend.R")
+# source("/home/ben/research/NOC/SRS_wave_analysis/ERA5/analysis/ggplot_ERA_trend.R")
    library(ggplot2)
    library(grid)
    library(gridExtra)
@@ -43,11 +43,12 @@
 
 # Matrix to hold datasets.
    attach(data_path[1])
-   attached_data <- list_CCI_trend
+   attached_data <- list_ERA_trend
    detach(pos=2)
 
 # Set up data structures.
    mat_plot_data <- matrix(NA,nrow=length(attached_data[[1]]$lat_cell),ncol=length(attached_data[[1]]$lon_cell))
+   mat_plot_data <- matrix(NA,nrow=length(attached_data[[1]]$lat_cell),ncol=90)
    mat_plot_CI <- matrix(NA,nrow=length(attached_data[[1]]$lat_cell),ncol=length(attached_data[[1]]$lon_cell))
    lab_dataset <- attached_data[[1]]$dataset_name
    lat_mid <- attached_data[[1]]$lat_mid
@@ -61,7 +62,7 @@
    stat_idx <- 1
    list_data <- attached_data[[2]]
 
-# list_CCI_trend dimensions:
+# list_ERA_trend dimensions:
 # 1,2: lat, lon
 # Matrix.
 # 3: mean
@@ -86,7 +87,7 @@
    plot_labels <- paste(lab_years," (",lab_dataset,"): Trend in ",lab_stats[stat_idx]," (",lab_months,",",lab_y_centre,",",flag_reg,")",sep="")
    for (k in 1:1) {
       df_plot <- rbind( df_plot,
-                            cbind( expand.grid( lat=lat_mid, lon=lon_mid ), plot_stat=as.vector(mat_plot_data), plot_CI=as.vector(mat_plot_CI), anal=plot_labels[k] )
+                            cbind( expand.grid( lat=rev(lat_mid), lon=c(lon_mid[46:90],lon_mid[1:45]) ), plot_stat=as.vector(mat_plot_data), plot_CI=as.vector(mat_plot_CI), anal=plot_labels[k] )
                           )
    }
 
@@ -166,7 +167,7 @@
          )
 
 # Include blank panels.
-   fig_file_name <- paste("./figures/CCI_trends/",res,"deg/trend_CI_",lab_stats[stat_idx],"_",paste(unlist(strsplit(lab_dataset,split=' ')),collapse='-'),"_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,".png",sep="")
+   fig_file_name <- paste("./figures/ERA_trends/",res,"deg/trend_CI_",lab_stats[stat_idx],"_",paste(unlist(strsplit(lab_dataset,split=' ')),collapse='-'),"_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,".png",sep="")
    png(filename = fig_file_name, width = 2400, height = 1300)
    plot(p1)
    dev.off()

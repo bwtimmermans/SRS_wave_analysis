@@ -27,7 +27,8 @@
    lab_months <- "annual"
 
 # Flag for regression.
-   flag_reg <- "ONI"
+   #flag_reg <- "ONI"
+   flag_reg <- "none"
 
 # Read analysis data (amtrix of lists).
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
@@ -37,7 +38,8 @@
 # MPI.
    #data_path <- paste("./output/mpi_test/list_",paste(vec_datasets[mission_idx],collapse='_'),"_all_data_trend_",lab_months,".Robj",sep="")
 # Resolution based.
-   data_path <- paste("./output/",res,"deg/list_trend_",data_type,"_",paste(vec_datasets[mission_idx],collapse='_'),"_",lab_years,"_",lab_months,"_110_",flag_reg,".Robj",sep="")
+   data_path <- paste("./output/",res,"deg/list_trend_",data_type,"_",paste(vec_datasets[mission_idx],collapse='_'),"_",lab_years,"_",lab_months,"_110_",flag_reg,"_globtest.Robj",sep="")
+   #data_path <- "./output/4deg/list_trend_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_2010-2018_KU-all_annual.Robj"
 
 # Matrix to hold datasets.
    attach(data_path[1])
@@ -57,7 +59,7 @@
 # 1: Q50
 # 2: Q90
 # 3: Q95
-   stat_idx <- 1
+   stat_idx <- 2
    list_data <- attached_data[[2]]
 
 # list_SRS_trend dimensions:
@@ -167,7 +169,7 @@
 # Include blank panels.
    #fig_file_name <- paste("./figures/SRS_trends/trend_CI_block_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),".png",sep="")
    #fig_file_name <- paste("./figures/SRS_trends/trend_CI_all_KU_",lab_months,"_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),"_mpi.png",sep="")
-   fig_file_name <- paste("./figures/SRS_trends/",res,"deg/trend_CI_",data_type,"_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),"_",lab_years,"_",lab_months,"_",flag_reg,".png",sep="")
+   fig_file_name <- paste("./figures/SRS_trends/",res,"deg/trend_CI_",data_type,"_",lab_stats[stat_idx],"_",paste(lab_dataset,collapse='_'),"_",lab_years,"_",lab_months,"_",flag_reg,"_globtest.png",sep="")
    png(filename = fig_file_name, width = 2400, height = 1300)
    plot(p1)
    dev.off()

@@ -13120,23 +13120,19 @@ div#notebook {
 <p><li><a href=https://stats.stackexchange.com/questions/99829/how-to-obtain-a-confidence-interval-for-a-percentile>https://stats.stackexchange.com/questions/99829/how-to-obtain-a-confidence-interval-for-a-percentile</a></p>
 <p><li><a href=https://www.r-bloggers.com/better-confidence-intervals-for-quantiles/>https://www.r-bloggers.com/better-confidence-intervals-for-quantiles/</a></p>
 <h2 id="1.--Hahn-and-Meeker-(link-#1)">1.  Hahn and Meeker (link #1)<a class="anchor-link" href="#1.--Hahn-and-Meeker-(link-#1)">&#182;</a></h2><p>To summarise crudely, since a quantile is obtained from the <i>order statistics</i>, we then need to compute the probability that the number of order statistics on either side of the quantile is neither too small nor too large. One possible issue in this situation is that the order statistics do not divide into the correct proportions to yield either an exact quantile, or the confidence intervals. This is typically addressed by recursive interpolation and searching, but we leave this aside for now.</p>
-<p>In this case, the problem of establishing the confidence intervals can be addressed through binomial sampling. For example, imagine that the quantile (i.e. cumulative probability) in question is obtained in the same way that one might find the probability of a coin toss. That is, given a coin with a probability $\alpha$ of a head, and $1 - \alpha$ of a tail, or, $P(H) = \alpha$ and $P(T) = 1 - P(H)$, we can find the value of $\alpha$ through sampling.</p>
+<p>In this case, the problem of establishing the confidence intervals can be addressed through binomial sampling. For example, imagine that the quantile in question is obtained in the same way that one might find the probability of a coin toss. That is, given a coin with a probability $\alpha$ of a head, and $1 - \alpha$ of a tail, or, $P(H) = \alpha$ and $P(T) = 1 - P(H)$, we can find the value of $\alpha$ through sampling.</p>
+<p>Given $n$ trials with binary probability $q$, the sampling distribution of the (two) possible outcomes for repeated trials follows the binomial distribution. (TBC)</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span>
-</pre></div>
-
-    </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="analysis/functions/t-dist_samples.png"></p>
+<h4 id="Figure:-Effect-of-sample-size-on-quantile-uncertainty-for-t-distribution.">Figure: Effect of sample size on quantile uncertainty for t-distribution.<a class="anchor-link" href="#Figure:-Effect-of-sample-size-on-quantile-uncertainty-for-t-distribution.">&#182;</a></h4>
 </div>
 </div>
-
 </div>
     </div>
   </div>

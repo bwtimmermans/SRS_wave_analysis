@@ -4,6 +4,7 @@
 # BT 04/2019
 
 # Libraries.
+   #.comm.size <- 4; .comm.rank <- 3
    library(ncdf4)
    library(abind)
    library(extRemes)
@@ -20,12 +21,15 @@
 # Data tpye (KU-all, KU-pass, CU etc).
    data_type <- "KU-all"
 
+# QA threshold to remove poorly sampled locations.
+  QA_thresh <- 2000
+
 # Specify domain.
-   lon_range <- 120:239
+   lon_range <- 1:360
    #lon_range <- 210:219
    lon_mid <- lon_range+0.5
-   lat_range <- 0:59
-   #lat_range <- 0:11
+   lat_range <- -79:80
+   #lat_range <- -19:20
    lat_mid <- lat_range+0.5
 
 # Resolution (1 = 1 degree, 2 = 2 degree, etc).
@@ -34,10 +38,11 @@
 # Analysis duration (typically the coverage of the chosen missions).
    #anal_years <- min(mat_valid_dates[,mission_idx]):max(mat_valid_dates[,mission_idx])
    anal_years <- 2010:2018
+   anal_years <- 1992:2018
    lab_years <- paste(anal_years[c(1,length(anal_years))],collapse='-')
 
 # Flag for regression.
-   flag_reg <- "ONI"
+   flag_reg <- "none"
 
 # Parallelise over the geographic range, by longitude.
 # Parallelise over longitude, divide the range by number of processing cores.
@@ -56,8 +61,8 @@
    mat_lat_grid_idx <- matrix(1:length(lat_range),nrow=res)
    mat_lon_grid_idx <- matrix(1:length(lon_range_node),nrow=res)
 
-# Data set selection.
-   mission_idx <- 6:10
+# Data set (mission) selection.
+   mission_idx <- c(2:9)
 
 # Months for analysis.
    flag_annual <- TRUE
@@ -80,7 +85,8 @@
 
 # ================================================================= #
 # Data path.
-   data_path <- "/home/ben/research/NOC/SRS_wave_analysis/datasets/IMOS/"
+   #data_path <- "/home/ben/research/NOC/SRS_wave_analysis/datasets/IMOS/"
+   data_path <- "/backup/datasets/SRS/"
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
    lab_missions <- paste(vec_datasets[mission_idx],collapse='_')
 
@@ -91,8 +97,9 @@
    array_filenames <- NULL
    for (m_idx in mission_idx) {
       nc_sat1 <- paste(vec_datasets[m_idx],"/IMOS_SRS-Surface-Waves_MW_",vec_datasets[m_idx],"_FV02_",sep="")
-      vec_lat_sat <- unlist( lapply(X=rev(lat_range),FUN=function(x) { paste(tail(strsplit(paste("00",x,"N",sep=""),split='')[[1]],n=4),collapse='') } ) )
-      vec_lon_sat <- paste(lon_range_node,"E",sep="")
+      vec_lat_sat <- c( unlist( lapply(X=rev(lat_range[lat_range >= 0]),FUN=function(x) { paste(tail(strsplit(paste("00",x,"N",sep=""),split='')[[1]],n=4),collapse='') } ) ),
+                     unlist( lapply(X=(lat_range[lat_range < 0] + (length(lat_range) / 2)),FUN=function(x) { paste(tail(strsplit(paste("00",x,"S",sep=""),split='')[[1]],n=4),collapse='') } ) ) )
+      vec_lon_sat <- unlist( lapply(X=lon_range,FUN=function(x) { paste(tail(strsplit(paste("00",x,"E",sep=""),split='')[[1]],n=4),collapse='') } ) )
       vec_lonlat_sat <- paste(rep(vec_lat_sat,times=length(vec_lon_sat)),"-",rep(vec_lon_sat,each=length(vec_lat_sat)),sep="")
       vec_filenames_sat1 <- paste(nc_sat1,vec_lonlat_sat,"-DM00.nc",sep="")
       mat_filenames_sat1 <- matrix(vec_filenames_sat1,nrow=length(vec_lat_sat))
@@ -121,7 +128,7 @@
    colnames(mat_ONI) <- c("ONI_mean","ONI_var","ONI_minmax")
    rownames(mat_ONI) <- df_ONI[,1]
 # ONI range based upon 2018.
-   ONI_years <- which( as.numeric(rownames(mat_ONI)) == anal_years[1] ):which( as.numeric(rownames(mat_ONI)) == 2018 )
+   ONI_years <- which( as.numeric(rownames(mat_ONI)) == anal_years[1] ):which( as.numeric(rownames(mat_ONI)) == anal_years[length(anal_years)] )
 
 # NAO.
    df_NAO <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/norm.nao.monthly.b5001.current.ascii.table",header=FALSE,sep=',')
@@ -142,7 +149,7 @@
    colnames(mat_NAO) <- c("NAO_mean","NAO_var","NAO_minmax")
    rownames(mat_NAO) <- df_ONI[,1]
 # NAO range based upon 2018.
-   NAO_years <- which( as.numeric(rownames(mat_NAO)) == anal_years[1] ):which( as.numeric(rownames(mat_NAO)) == 2018 )
+   NAO_years <- which( as.numeric(rownames(mat_NAO)) == anal_years[1] ):which( as.numeric(rownames(mat_NAO)) == anal_years[length(anal_years)] )
 
 # ================================================================= #
 # Data structures.
@@ -166,7 +173,7 @@
 
 # Loop over res "sub" indices.
             for (sub_lon_idx in 1:dim(mat_lon_grid_idx)[1]) {
-               lon_idx <- mat_lon_grid_idx[sub_lon_idx,lon_res_idx]
+               lon_idx <- lon_range_node[mat_lon_grid_idx[sub_lon_idx,lon_res_idx]]
                for (sub_lat_idx in 1:dim(mat_lat_grid_idx)[1]) {
                   lat_idx <- mat_lat_grid_idx[sub_lat_idx,lat_res_idx]
 
@@ -176,7 +183,7 @@
 
                   if(! (file.exists(nc1_f) )) {
                      print(paste(nc1_f,": File does not exist!"))
-                     print(paste("LAT:",lat_range[lat_idx],"; LON:",lon_range_node[lon_idx]))
+                     print(paste("LAT:",lat_range[lat_idx],"; LON:",lon_idx))
                      #mat_block_temp[,m_idx] <- NA
                   } else {
 # Open file.
@@ -210,26 +217,30 @@
                }
             }
          }
-         if (!is.null(unlist(mat_annual_hs))) {
+         if ( !is.null(unlist(mat_annual_hs)) & (length(unlist(mat_annual_hs))/length(anal_years) > QA_thresh ) ) {
+         #if ( !is.null(unlist(mat_annual_hs) ) ) {
 # Array for annual data (stats, CIs) and temps to hold sub-grid data.
-            array_annual_stats <- array(NA,dim=c(length(anal_years),length(vec_q),3))
+            array_annual_stats <- array(NA,dim=c(length(anal_years),1+length(vec_q),3))
 # Loop over years to get total obs from each mission.
             for (y_idx in 1:length(anal_years)) {
                temp_annual_hs <- unlist(mat_annual_hs[y_idx,])
-# Do stats.
-               array_annual_stats[y_idx,,2] <- quantile(temp_annual_hs,probs=vec_q)
+# Do quantiles.
+               array_annual_stats[y_idx,1:3,2] <- quantile(temp_annual_hs,probs=vec_q)
+# Do mean / variance.
+               array_annual_stats[y_idx,4,2] <- mean(temp_annual_hs)
+               array_annual_stats[y_idx,4,c(1,3)] <- array_annual_stats[y_idx,4,2] + c(-var(temp_annual_hs),var(temp_annual_hs))
 # Do CIs.
-               array_annual_stats[y_idx,,c(1,3)] <- t(sapply(X=vec_q,FUN=function(x) { sort(temp_annual_hs)[quantile.CI(length(temp_annual_hs),q=x)$Interval] }))
+               array_annual_stats[y_idx,1:3,c(1,3)] <- t(sapply(X=vec_q,FUN=function(x) { sort(temp_annual_hs)[quantile.CI(length(temp_annual_hs),q=x)$Interval] }))
             }
 # Trend (linear regression).
             mat_b_q <- array_annual_stats[,,2]
-            colnames(mat_b_q) <- paste("Q",100*vec_q,sep="")
+            colnames(mat_b_q) <-c( paste("Q",100*vec_q,sep=""),"mean" )
             df_Q <- data.frame(cbind(year=anal_years,mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,]))
 
-            mat_trend <- matrix(NA,nrow=length(vec_q),ncol=2)
-            for (qq in 1:length(vec_q)) {
+            mat_trend <- matrix(NA,nrow=1+length(vec_q),ncol=2)
+            for (qq in 1:(1+length(vec_q))) {
 # Catch if lack of data for regression.
-               if (!all(is.na(df_Q[,(qq+1)]))) {
+               if ( sum(!is.na(df_Q[,(qq+1)])) > 5 ) {
                   if (flag_reg == "NAO") {
                      lm_Q <- lm(df_Q[,(qq+1)] ~ year + NAO_mean,data=df_Q)
                   } else if (flag_reg == "ONI") {
@@ -263,11 +274,11 @@
                       orig_lat_cell=lat_range, orig_lon_cell=lon_range,
                       lat_cell=matrix(lat_range,nrow=res)[1,],lon_cell=matrix(lon_range,nrow=res)[1,],
                       lat_mid=(matrix(lat_range,nrow=res)[1,] + (res/2)),lon_mid=(matrix(lon_range,nrow=res)[1,] + (res/2)),
-                      trend_stats=paste("Q",100*c(0.5,0.9,0.95),sep=""),trend=c("slope","P-val"))
+                      trend_stats=c(paste("Q",100*c(0.5,0.9,0.95),sep=""),"mean"),trend=c("slope","P-val"))
    list_SRS_trend <- list(array_meta,mat_list_annual_trend)
 
 # Write out data.
-   data_file <- paste("./output/",res,"deg/list_trend_",data_type,"_",lab_missions,"_",lab_years,"_",lab_months,"_110_",flag_reg,".Robj",sep="")
+   data_file <- paste("./output/",res,"deg/list_trend_",data_type,"_",lab_missions,"_",lab_years,"_",lab_months,"_global_",flag_reg,".Robj",sep="")
    save(list_SRS_trend,file = data_file)
 
    finalize()

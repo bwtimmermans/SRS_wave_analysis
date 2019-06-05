@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="utf-8" />
 
-<title>SRS_wave_analysis</title>
+<title>trend_intercomparisons_R</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -13116,16 +13116,13 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">An analysis of IMOS SRS ocean wave height satellite observation dataset.<a class="anchor-link" href="#An-analysis-of-IMOS-SRS-ocean-wave-height-satellite-observation-dataset.">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="References">References<a class="anchor-link" href="#References">&#182;</a></h2><p><a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a> describe the production of the data base.
-Production is obtained from here: <a href=http://thredds.aodn.org.au/thredds/catalog/IMOS/SRS/Surface-Waves/Wave-Wind-Altimetry-DM00/catalog.html>http://thredds.aodn.org.au/thredds/catalog/IMOS/SRS/Surface-Waves/Wave-Wind-Altimetry-DM00/catalog.html</a></p>
-<p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2016GL071681>Timmermans et al. (2017)</a> describe the characteristics of simulated wave climate at different resolution, and provide some comparisons of simulated wind and wave height data with observations.</p>
+<h1 id="Project-summary">Project summary<a class="anchor-link" href="#Project-summary">&#182;</a></h1><h3>Project summary here: <a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary</a></h3>
+<h1 id="Intercomparison-of-trends-taken-from-different-sources">Intercomparison of trends taken from different sources<a class="anchor-link" href="#Intercomparison-of-trends-taken-from-different-sources">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>Here we compare trends in $H_s$ obtained from a range of historic global datasets. The primary objective is to learn about the relationship between satellite products and other commonly used datasets. Note that at this point we generally assume products to be independent, which is clearly false for most comparisons since satellite observations have been either directly or indirectly (via winds for example) assimilated.</p>
+<h3 id="Datasets">Datasets<a class="anchor-link" href="#Datasets">&#182;</a></h3><p><li> <a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a></p>
+<p><li> CCI L4</p>
+<p><li> <a href=https://climate.copernicus.eu/climate-reanalysis>ERA-5</a></p>
+<p>Notes:</p>
+<p><li>Figure titles include parenthesized labels, that relate to i) the period used for each year, ii) whether the annual data was centred about summer or winter, iii) regression was based on time only, or whether ONI or NAO indices were also included: (annual,n_summer,none) = (<b>annual | months</b>, <b>summer | winter</b> "centred", <b> none | ONI | NAO </b>)</p>
 
 </div>
 </div>
@@ -13133,44 +13130,20 @@ Production is obtained from here: <a href=http://thredds.aodn.org.au/thredds/cat
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Data-summary">Data summary<a class="anchor-link" href="#Data-summary">&#182;</a></h2><p>Observations of $H_s$ are provided for each mission, and binned into $1 x 1^\circ$ grid cells. All measurements along the track that intersects the grid cell are included, typically up to about 12 measurements. This includes observations from both KU- and C-band where available.</p>
-<p><img src="./figures/ribal_missions.png">
-Figure 2 from Ribal and Young (2019) shows the temporal coincidence of missions.</p>
-
+<h2 id="Trends-in-mean,-1992-2018">Trends in mean, 1992-2018<a class="anchor-link" href="#Trends-in-mean,-1992-2018">&#182;</a></h2><p><i>Code: </i></p>
+<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_none.png"></p>
+<h4 id="Figure:-CCI-L4.">Figure: CCI L4.<a class="anchor-link" href="#Figure:-CCI-L4.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_1992-2018_annual_none_globtest_QA.png"></p>
+<h4 id="Figure:-Young-dataset.-There-is-presumably-something-wrong-with-this-analysis,-but-I'm-yet-to-identify-the-issue!">Figure: Young dataset. There is presumably something wrong with this analysis, but I'm yet to identify the issue!<a class="anchor-link" href="#Figure:-Young-dataset.-There-is-presumably-something-wrong-with-this-analysis,-but-I'm-yet-to-identify-the-issue!">&#182;</a></h4><p><img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2018_annual_n_summer_none.png"></p>
+<h4 id="Figure:-ERA-5.">Figure: ERA-5.<a class="anchor-link" href="#Figure:-ERA-5.">&#182;</a></h4>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Characteristics-of-the-wave-climate">Characteristics of the wave climate<a class="anchor-link" href="#Characteristics-of-the-wave-climate">&#182;</a></h2><p>Simulations of ocean waves from a simulated atmosphere at $\sim$25 km global resolution
-<a href=https://www.youtube.com/watch?v&#61;k9NqhLqKhWQ> can be seen here</a>. Region-by-region, and season-by-season circulation patterns can be seen that govern ocean wave conditions. For example, waves in the northern Pacific and northern Atlantic tend to be driven by large scale circulation blowing from the west. In contrast the tropics are affected seasonally by tropical cyclones that may be much more geospatially compact.</p>
-
+<h2 id="Seasonal-trends">Seasonal trends<a class="anchor-link" href="#Seasonal-trends">&#182;</a></h2>
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Exploratory-analysis-of-satellite-data">Exploratory analysis of satellite data<a class="anchor-link" href="#Exploratory-analysis-of-satellite-data">&#182;</a></h1><h2 id="Comparison-with-buoy-observations">Comparison with buoy observations<a class="anchor-link" href="#Comparison-with-buoy-observations">&#182;</a></h2><p>A fairly crude comparison of the sampled distribution of $H_s$ can be made through a Q-Q plot of all the (KU-band) satellite observations, and buoy observations. In the figure below, observations from four missions that coincide with the life time of the buoy are compared. Note that buoy 46066 covers the period 2000-2018, so JASON-1 (2002-2013) coincides most completely.</p>
-<p><img src="./analysis/figures/46066_5678_annual.png"></p>
-<p>In the figure above, Q50 (the median, ~2.5m) is marked by the dashed red lines. Although small in absolute terms (~10 cm) statistically significant discrepancies can be seen.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-    </div>
-</div>
-</div>
-
 </div>
     </div>
   </div>

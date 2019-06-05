@@ -9,6 +9,7 @@
    library(extRemes)
 # MPI.
    library(pbdMPI, quietly = TRUE)
+   init()
    .comm.size <- comm.size()
    .comm.rank <- comm.rank()
 
@@ -38,6 +39,9 @@
 
 # Analysis duration.
 # Note for 'flag_winter', first year must be >= 1993.
+   anal_years <- 1992:2000
+   anal_years <- 2001:2009
+   anal_years <- 2010:2018
    anal_years <- 1992:2018
 
 # Flag for complete winter season.
@@ -48,14 +52,14 @@
    all_months <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
 # Months for analysis.
-   flag_annual <- TRUE
+   flag_annual <- FALSE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
    #anal_months <- c("07","08","09")
    #anal_months <- c("10","11","12")
    #anal_months <- c("01","02","11","12")
-   #anal_months <- c("01","02","03","10","11","12")
-   anal_months <- c("04","05","06","07","08","09")
+   anal_months <- c("01","02","03","10","11","12")
+   #anal_months <- c("04","05","06","07","08","09")
    #anal_months <- c("01","02","03","04","05","06")
    #anal_months <- c("07","08","09","10","11","12")
    if (!flag_annual) {
@@ -66,8 +70,8 @@
 
 # Flag for regression.
    flag_reg <- "ONI"
-   #flag_reg <- "NAO"
-   #flag_reg <- "none"
+   flag_reg <- "NAO"
+   flag_reg <- "none"
 
 # Parallelise over the geographic range, by longitude.
 # Parallelise over longitude, divide the range by number of processing cores.
@@ -148,7 +152,7 @@
    colnames(mat_ONI) <- c("ONI_mean","ONI_var","ONI_minmax")
    rownames(mat_ONI) <- df_ONI[,1]
 # ONI range based upon 2018.
-   ONI_years <- which( as.numeric(rownames(mat_ONI)) == anal_years[1] ):which( as.numeric(rownames(mat_ONI)) == 2018 )
+   ONI_years <- which( as.numeric(rownames(mat_ONI)) == anal_years[1] ):which( as.numeric(rownames(mat_ONI)) == anal_years[length(anal_years)] )
 
 # NAO.
    df_NAO <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/norm.nao.monthly.b5001.current.ascii.table",header=FALSE,sep=',')
@@ -169,7 +173,7 @@
    colnames(mat_NAO) <- c("NAO_mean","NAO_var","NAO_minmax")
    rownames(mat_NAO) <- df_ONI[,1]
 # NAO range based upon 2018.
-   NAO_years <- which( as.numeric(rownames(mat_NAO)) == anal_years[1] ):which( as.numeric(rownames(mat_NAO)) == 2018 )
+   NAO_years <- which( as.numeric(rownames(mat_NAO)) == anal_years[1] ):which( as.numeric(rownames(mat_NAO)) == anal_years[length(anal_years)] )
 
 # ================================================================= #
 # Data structures.
@@ -190,6 +194,9 @@
 # Data structures.
          mat_stats_temp <- matrix(NA,nrow=length(anal_years),4)
 # Data aggregation.
+# Test for at least 75% observations.
+         if ( (sum(!is.na(as.vector(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],1,,2]))) /
+              length(as.vector(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],1,,2]))) > 0.15 ) {
 # Centre year on winter season.
          if (flag_winter) {
             if (flag_annual) {
@@ -243,7 +250,7 @@
          }
          df_stats <- as.data.frame(mat_stats_temp)
          colnames(df_stats) <- c("swh_counts","swh_mean","swh_squared_sum","swh_var")
-         rownames(df_stats) <- anal_years
+         #rownames(df_stats) <- anal_years
 
 # Trend (linear regression).
          df_Q <- data.frame(cbind(year=anal_years,df_stats,mat_ONI[ONI_years,],mat_NAO[NAO_years,]))
@@ -269,6 +276,10 @@
 # Store for writing.
             mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- df_stats
             mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- mat_trend
+         } else{
+            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
+            mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA
+         }
          } else{
             mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
             mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA

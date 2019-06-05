@@ -153,14 +153,14 @@
 # Compute temporal residual distribution.
 #-----------------------------------------------------------------------#
 # Loop over satellite obs.
-   vec_min_time <- numeric(length(nc1_date))
-   for (nc1_idx in 1:length(nc1_date)) {
-      vec_search <- vec_buoy_dates[ mat_b_date_search[[ which(year_list == format(nc1_date[nc1_idx],"%Y")) , as.numeric(format(nc1_date[nc1_idx],"%m")) ]] ]
-      vec_min_time[nc1_idx] <- tryCatch( min( abs( sapply(X=vec_search,FUN=difftime,time2=nc1_date[nc1_idx],units = "mins") ) ), error = function(e) { AA <- NA; return(AA) } )
-   }
+      vec_min_time <- numeric(length(nc1_date))
+      for (nc1_idx in 1:length(nc1_date)) {
+         vec_search <- vec_buoy_dates[ mat_b_date_search[[ which(year_list == format(nc1_date[nc1_idx],"%Y")) , as.numeric(format(nc1_date[nc1_idx],"%m")) ]] ]
+         vec_min_time[nc1_idx] <- tryCatch( min( abs( sapply(X=vec_search,FUN=difftime,time2=nc1_date[nc1_idx],units = "mins") ) ), error = function(e) { AA <- NA; return(AA) } )
+      }
 # Histogram.
-   X11()
-   hist(vec_min_time[vec_min_time < 201], xlim=c(0,200),breaks=25)
+      X11()
+      hist(vec_min_time[vec_min_time < 201], xlim=c(0,200),breaks=25)
 
 #-----------------------------------------------------------------------#
 # Analysis:

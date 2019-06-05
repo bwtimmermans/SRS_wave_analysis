@@ -13117,8 +13117,11 @@ div#notebook {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Project-summary">Project summary<a class="anchor-link" href="#Project-summary">&#182;</a></h1><h3>Please visit project summary here: <a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary</a></h3>
-<h1 id="Exploration-of-temporal-trends-in-CCI-L4-dataset">Exploration of temporal trends in CCI L4 dataset<a class="anchor-link" href="#Exploration-of-temporal-trends-in-CCI-L4-dataset">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>THe CCI L4 dataset spans 1992 to 2018. In contrast to the Young dataset, it provides a range of summary statistics, as opposed to the entire collection of track observations from each mission and instrument.</p>
-<p>Here we evaluate the temporal trend based upon the monthly statistics provided.</p>
+<h1 id="Exploration-of-temporal-trends-in-CCI-L4-dataset">Exploration of temporal trends in CCI L4 dataset<a class="anchor-link" href="#Exploration-of-temporal-trends-in-CCI-L4-dataset">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>The CCI L4 dataset spans 1992 to 2018. In contrast to the Young dataset, it provides a range of summary statistics, as opposed to the entire collection of track observations from each mission and instrument. Here we evaluate the temporal trend based upon the monthly statistics provided.</p>
+<p>Notes:</p>
+<p><li>Annual summary data is obtained from monthly averages.</p>
+<p><li>Figure titles include parenthesized labels, that relate to i) the period used for each year, ii) whether the annual data was centred about summer or winter, iii) regression was based on time only, or whether ONI or NAO indices were also included: (annual,n_summer,none) = (<b>annual | months</b>, <b>summer | winter</b> "centred", <b> none | ONI | NAO </b>)</p>
+<p><li>Some spurios data points, some of which appear over land areas. These are typically due to sparse data, perhaps where large inland bodies of water exist, or areas near the coast. Basic QA procedures have been applied to eliminate most spurious points.</p>
 
 </div>
 </div>
@@ -13132,11 +13135,10 @@ div#notebook {
 <p>We can also re-centre the year around the Boreal winter, i.e. aggregating data from July to June rather than January to December.</p>
 <p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_winter_none.png"></p>
 <p>The results do not change substantially in the two cases.</p>
-<h2 id="Seasonal">Seasonal<a class="anchor-link" href="#Seasonal">&#182;</a></h2><h3 id="Trends-in-mean-Hs-based-upon-November-December-January-February.">Trends in mean Hs based upon November-December-January-February.<a class="anchor-link" href="#Trends-in-mean-Hs-based-upon-November-December-January-February.">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_JFND_n_summer_none.png"></p>
-<p>The only substanial positive long term trend appears to be in the Southern Ocean, particularly evident in Austral winter. Also of note is the clear negative trend that spans most of the North Pacific.</p>
-<h3 id="Trends-in-mean-Hs-based-upon-AMJJAS.">Trends in mean Hs based upon AMJJAS.<a class="anchor-link" href="#Trends-in-mean-Hs-based-upon-AMJJAS.">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_AMJJAS_n_summer_none.png"></p>
-<p>A strong negative trend is evident that covers much of the Indian Ocean. It is particularly evident in Boreal winter.</p>
-
+<h2 id="Seasonal">Seasonal<a class="anchor-link" href="#Seasonal">&#182;</a></h2><h3 id="Trend-in-mean-Hs-based-upon-ONDJFM-(southern-hemisphere-summer).">Trend in mean Hs based upon ONDJFM (southern hemisphere summer).<a class="anchor-link" href="#Trend-in-mean-Hs-based-upon-ONDJFM-(southern-hemisphere-summer).">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_JFMOND_n_summer_none.png"></p>
+<h4 id="Figure:-The-only-substanial-positive-long-term-trend-appears-to-be-in-the-Southern-Ocean,-particularly-evident-in-Austral-winter.-Also-of-note-is-the-clear-negative-trend-that-spans-most-of-the-North-Pacific.">Figure: The only substanial positive long term trend appears to be in the Southern Ocean, particularly evident in Austral winter. Also of note is the clear negative trend that spans most of the North Pacific.<a class="anchor-link" href="#Figure:-The-only-substanial-positive-long-term-trend-appears-to-be-in-the-Southern-Ocean,-particularly-evident-in-Austral-winter.-Also-of-note-is-the-clear-negative-trend-that-spans-most-of-the-North-Pacific.">&#182;</a></h4><h3 id="Trend-in-mean-Hs-based-upon-NDJF.">Trend in mean Hs based upon NDJF.<a class="anchor-link" href="#Trend-in-mean-Hs-based-upon-NDJF.">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_JFND_n_summer_none.png"></p>
+<h4 id="Figure:--Regional-trend-patterns-change-slightly-where-only-months-NDJF-are-selected.-In-particular,-the-positive-trend-in-the-south-Atlantic-appears-to-be-diminshed.">Figure:  Regional trend patterns change slightly where only months NDJF are selected. In particular, the positive trend in the south Atlantic appears to be diminshed.<a class="anchor-link" href="#Figure:--Regional-trend-patterns-change-slightly-where-only-months-NDJF-are-selected.-In-particular,-the-positive-trend-in-the-south-Atlantic-appears-to-be-diminshed.">&#182;</a></h4><h3 id="Trends-in-mean-Hs-based-upon-AMJJAS-(northern-hemisphere-summer).">Trends in mean Hs based upon AMJJAS (northern hemisphere summer).<a class="anchor-link" href="#Trends-in-mean-Hs-based-upon-AMJJAS-(northern-hemisphere-summer).">&#182;</a></h3><p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_AMJJAS_n_summer_none.png"></p>
+<h4 id="Figure:--A-strong-negative-trend-is-evident-that-covers-much-of-the-Indian-Ocean.-It-is-particularly-evident-in-Boreal-winter.">Figure:  A strong negative trend is evident that covers much of the Indian Ocean. It is particularly evident in Boreal winter.<a class="anchor-link" href="#Figure:--A-strong-negative-trend-is-evident-that-covers-much-of-the-Indian-Ocean.-It-is-particularly-evident-in-Boreal-winter.">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -13162,6 +13164,30 @@ div#notebook {
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="QA-issues">QA issues<a class="anchor-link" href="#QA-issues">&#182;</a></h1><p>While the CCI product incorporates QA procedures (of some kind), when performing analysis of long term trends and aggregating spatially, spurios data still arises. For example, over land, possibly in the vicinity of large lakes, andd close to the coast, sporadic infrequent observations are present. This gives rise to apparent, but spurios, temporal trends.</p>
+<p>The figures below show the effect of requiring at least 15% of the aggregated data. For example, when considering 4 degree bins, a total of 16 grid cells are aggregated. The 15% conditions requires that at least 3 of those cells contains observations, for every year in the record.</p>
+<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2000_annual_n_summer_none_noQA.png"></p>
+<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2000_annual_n_summer_none_75QA.png"></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div>
     </div>
   </div>
