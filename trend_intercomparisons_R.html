@@ -13118,11 +13118,19 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Project-summary">Project summary<a class="anchor-link" href="#Project-summary">&#182;</a></h1><h3>Project summary here: <a href=https://bwtimmermans.github.io/SRS_wave_analysis/index.html>Project summary</a></h3>
 <h1 id="Intercomparison-of-trends-taken-from-different-sources">Intercomparison of trends taken from different sources<a class="anchor-link" href="#Intercomparison-of-trends-taken-from-different-sources">&#182;</a></h1><h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>Here we compare trends in $H_s$ obtained from a range of historic global datasets. The primary objective is to learn about the relationship between satellite products and other commonly used datasets. Note that at this point we generally assume products to be independent, which is clearly false for most comparisons since satellite observations have been either directly or indirectly (via winds for example) assimilated.</p>
-<h3 id="Datasets">Datasets<a class="anchor-link" href="#Datasets">&#182;</a></h3><p><li> <a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a></p>
+<h2 id="Literature-and-notes-on-regional-trends.">Literature and notes on regional trends.<a class="anchor-link" href="#Literature-and-notes-on-regional-trends.">&#182;</a></h2><h3 id="North-Atlantic">North Atlantic<a class="anchor-link" href="#North-Atlantic">&#182;</a></h3><p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JC001124>Woolf et al. (2002) Variability and predictability of the North Atlantic wave climate.</a> Satellite datasets from 1985 to 1999 used for analysis. Winter months assessed (December–March). "The North Atlantic Oscillation emerges as a primary agent of wave climate variability." Also "Eastern Atlantic" SLP pattern.</p>
+<p><a href=https://www.sciencedirect.com/science/article/pii/S1463500309002066>Dodet et al. 2010, Wave climate variability in the North-East Atlantic Ocean over the last six decades, Ocean Modelling Volume 31, Issues 3–4, 2010, Pages 120-131</a>. 1953-2009 WW3 hindcast, (ECMWF?) reanalysis winds. They report very strong correlation of $H_s$ with NAO (up to 0.91) at northern-most latitudes.</p>
+<p><a href=https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1002/2014JC010440>Bromirski and Cayan (2015) Wave power variability and trends across the North Atlantic influenced by decadal climate patterns, JGR:Oceans</a>. 1948-2008 WW3.14 hindcast, NCEP reanalysis winds. Strong winter-time positive phase NAO affects trend in NEA, no trend in NWA. Also find connection in NWA with "Pacific North American" pattern (PDO?). Decreasing trend from 2000-2008 due to NAO shift to negative phase.</p>
+<p><a href=https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1002/joc.4415>Adrián Martínez‐Asensio et al. (2015) Response of the North Atlantic wave climate to atmospheric modes of variability</a>.</p>
+<p><a href=https://onlinelibrary.wiley.com/doi/pdf/10.1002/qj.2364>Feser et al. (2015) Storminess over the North Atlantic and northwestern Europe—A review</a>.</p>
+<p><a href=https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2015GL067492>Masselink et al. (2016) Extreme wave activity during 2013/2014 winter and morphological impacts along the Atlantic coast of Europe.</a></p>
+<p><a href=https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1002/2016GL072379>Castelle et al. (2019) A new climate index controlling winter wave activity along the Atlantic coast of Europe:The West Europe Pressure Anomaly</a></p>
+<h3 id="Datasets-used-in-analysis">Datasets used in analysis<a class="anchor-link" href="#Datasets-used-in-analysis">&#182;</a></h3><p><li> <a href=https://www.researchgate.net/publication/330546310>Ribal and Young (2019)</a></p>
 <p><li> CCI L4</p>
 <p><li> <a href=https://climate.copernicus.eu/climate-reanalysis>ERA-5</a></p>
 <p>Notes:</p>
 <p><li>Figure titles include parenthesized labels, that relate to i) the period used for each year, ii) whether the annual data was centred about summer or winter, iii) regression was based on time only, or whether ONI or NAO indices were also included: (annual,n_summer,none) = (<b>annual | months</b>, <b>summer | winter</b> "centred", <b> none | ONI | NAO </b>)</p>
+<p><i>Code: CCI_trend_alldata_mpi_template.R; run_batch_trend.sh; ggplot_CCI_trend_NEA_template.R; run_batch_plot.sh</i></p>
 
 </div>
 </div>
@@ -13130,18 +13138,97 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Trends-in-mean,-1992-2018">Trends in mean, 1992-2018<a class="anchor-link" href="#Trends-in-mean,-1992-2018">&#182;</a></h2><p><i>Code: </i></p>
-<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_none.png"></p>
-<h4 id="Figure:-CCI-L4.">Figure: CCI L4.<a class="anchor-link" href="#Figure:-CCI-L4.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_1992-2018_annual_none_globtest_QA.png"></p>
-<h4 id="Figure:-Young-dataset.-There-is-presumably-something-wrong-with-this-analysis,-but-I'm-yet-to-identify-the-issue!">Figure: Young dataset. There is presumably something wrong with this analysis, but I'm yet to identify the issue!<a class="anchor-link" href="#Figure:-Young-dataset.-There-is-presumably-something-wrong-with-this-analysis,-but-I'm-yet-to-identify-the-issue!">&#182;</a></h4><p><img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2018_annual_n_summer_none.png"></p>
-<h4 id="Figure:-ERA-5.">Figure: ERA-5.<a class="anchor-link" href="#Figure:-ERA-5.">&#182;</a></h4>
+<h3 id="Trends-in-winter-time-mean,-1992-2000">Trends in winter time mean, 1992-2000<a class="anchor-link" href="#Trends-in-winter-time-mean,-1992-2000">&#182;</a></h3><pre style="background-color:#F5F5AA; padding:10px; border:1px solid #CCCCCC; border-radius:5px;">
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2000_JFMOND_n_summer_none_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2000_JFMOND_n_summer_none_NEA.png">
+
+<strong>Now included NAO as regressor...</strong>
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2000_JFMOND_n_summer_NAO_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2000_JFMOND_n_summer_NAO_NEA.png">
+
+</pre>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Seasonal-trends">Seasonal trends<a class="anchor-link" href="#Seasonal-trends">&#182;</a></h2>
+<h3 id="Trends-in-winter-time-mean,-2001-2009">Trends in winter time mean, 2001-2009<a class="anchor-link" href="#Trends-in-winter-time-mean,-2001-2009">&#182;</a></h3><pre style="background-color:#F5F5AA; padding:10px; border:1px solid #CCCCCC; border-radius:5px;">
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_2001-2009_JFMOND_n_summer_none_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_2001-2009_JFMOND_n_summer_none_NEA.png">
+
+<strong>Now included NAO as regressor...</strong>
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_2001-2009_JFMOND_n_summer_NAO_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_2001-2009_JFMOND_n_summer_NAO_NEA.png">
+
+</pre>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Trends-in-winter-time-mean,-2010-2018">Trends in winter time mean, 2010-2018<a class="anchor-link" href="#Trends-in-winter-time-mean,-2010-2018">&#182;</a></h3><pre style="background-color:#F5F5AA; padding:10px; border:1px solid #CCCCCC; border-radius:5px;">
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_2010-2018_JFMOND_n_summer_none_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_2010-2018_JFMOND_n_summer_none_NEA.png">
+
+<strong>Now included NAO as regressor...</strong>
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_2010-2018_JFMOND_n_summer_NAO_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_2010-2018_JFMOND_n_summer_NAO_NEA.png">
+
+</pre>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Trends-in-winter-time-mean,-1992-2018">Trends in winter time mean, 1992-2018<a class="anchor-link" href="#Trends-in-winter-time-mean,-1992-2018">&#182;</a></h3><pre style="background-color:#F5F5AA; padding:10px; border:1px solid #CCCCCC; border-radius:5px;">
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_JFMOND_n_summer_none_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2018_JFMOND_n_summer_none_NEA.png">
+
+<strong>Now included NAO as regressor...</strong>
+
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_JFMOND_n_summer_NAO_NEA.png">
+
+<img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2018_JFMOND_n_summer_NAO_NEA.png">
+
+</pre>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Global-trends-in-mean,-1992-2018">Global trends in mean, 1992-2018<a class="anchor-link" href="#Global-trends-in-mean,-1992-2018">&#182;</a></h2><p><i>Code: CCI_trend_alldata_mpi_template.R; run_batch_trend.sh; ggplot_CCI_trend_NEA_template.R; run_batch_plot.sh</i></p>
+<p><img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_none.png"></p>
+<h4 id="Figure:-CCI-L4.">Figure: CCI L4.<a class="anchor-link" href="#Figure:-CCI-L4.">&#182;</a></h4><p><img src="./ERA5/analysis/figures/ERA_trends/4deg/trend_CI_swh_mean_ERA5_1992-2018_annual_n_summer_none.png"></p>
+<h4 id="Figure:-ERA-5.">Figure: ERA-5.<a class="anchor-link" href="#Figure:-ERA-5.">&#182;</a></h4><p><img src="./analysis/figures/SRS_trends/4deg/trend_CI_KU-all_Q50_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_1992-2018_annual_none_globtest_QA.png"></p>
+<h4 id="Figure:-Young-dataset.-Work-in-progress...">Figure: Young dataset. Work in progress...<a class="anchor-link" href="#Figure:-Young-dataset.-Work-in-progress...">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><p><strong>Example 1:</strong></p></p>
+<pre style="background-color:#F5F599; padding:10px; border:1px solid #CCCCCC; border-radius:5px;">
+<img src="./CCI/analysis/figures/CCI_trends/4deg/trend_CI_swh_mean_CCI-L4_1992-2018_annual_n_summer_none.png">
+</pre>
 </div>
 </div>
 </div>

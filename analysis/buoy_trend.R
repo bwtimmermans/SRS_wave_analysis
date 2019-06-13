@@ -17,14 +17,17 @@
    #IMOS_SRS-Surface-Waves_MW_JASON-1_FV02_052N-205E-DM00.nc
 
 # Buoy 46066, 52.785N 155.047W
-   #buoy_list <- c("46066")
+   buoy_list <- c("46066")
    #buoy_list <- c("51004")
-   buoy_list <- c("41002")
+   #buoy_list <- c("41002")
    #buoy_list <- c("46006")
 
 # Averaging flag.
    #flag_av <- "24hr"
    flag_av <- "6hr"
+
+# Regression covariate.
+   lab_reg <- "NAO"
 
 #-----------------------------------------------------------------------#
 # Buoy data.
@@ -124,6 +127,29 @@
 # NAO range based upon 2018.
    NAO_years <- which( as.numeric(rownames(mat_NAO)) == start_year ):which( as.numeric(rownames(mat_NAO)) == 2018 )
 
+# PDO.
+   df_PDO <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/PDO_NOAA.csv",header=TRUE, sep=',')
+# Matrix containing mean, var and "min or max".
+   mat_PDO_temp <- t(matrix(df_PDO$Value[-c(1981:1985)],nrow=12))
+
+   mat_PDO <- matrix(NA,nrow=dim(mat_PDO_temp)[1],ncol=3)
+   mat_PDO[,1] <- apply(X=mat_PDO_temp,MAR=1,FUN=mean)
+   mat_PDO[,2] <- apply(X=mat_PDO_temp,MAR=1,FUN=var)
+# Min or max based upon whether the mean is positive or negative.
+   #for (i in 1:dim(df_PDO)[1]) {
+   for (i in 1:dim(mat_PDO_temp)[1]) {
+      if (mat_PDO[i,1] < 0) {
+         mat_PDO[i,3] <- min(mat_PDO_temp[i,])
+      } else {
+         mat_PDO[i,3] <- max(mat_PDO_temp[i,])
+      }
+   }
+# Column and row names.
+   colnames(mat_PDO) <- c("PDO_mean","PDO_var","PDO_minmax")
+   rownames(mat_PDO) <- 1854:2018
+# PDO range based upon 2018.
+   PDO_years <- which( as.numeric(rownames(mat_PDO)) == start_year ):which( as.numeric(rownames(mat_PDO)) == 2018 )
+
 #-----------------------------------------------------------------------#
 # Trend based upon annual data.
 #-----------------------------------------------------------------------#
@@ -204,7 +230,7 @@
    vec_q <- c(0.5,0.9,0.95)
    mat_b_q <- t(sapply(X=list_years,FUN=quantile,probs=vec_q,na.rm=T))
    colnames(mat_b_q) <- paste("Q",100*c(0.5,0.9,0.95),sep="")
-   df_Q_temp <- data.frame(cbind(year=seq_years,mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,]))
+   df_Q_temp <- data.frame(cbind(year=seq_years,mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,],mat_PDO[PDO_years,]))
    df_Q <- df_Q_temp[year_q_flag,]
 # Estimate CIs.
    array_q_CI_temp <- array(0,dim=c(length(seq_years),2,length(vec_q)))
@@ -217,20 +243,36 @@
    vec_CI_w[is.na(vec_CI_w)] <- 1
 
    file_lab_av <- paste(strsplit(lab_av,split=' ')[[1]][1:2],collapse='')
-   fig_file_name <- paste("./figures/buoy_trends/",buoy_name,"_QA_annual_",file_lab_av,".png",sep="")
+   fig_file_name <- paste("./figures/buoy_trends/",buoy_name,"_QA_annual_",file_lab_av,"_",lab_reg,".png",sep="")
    #X11()
    png(filename = fig_file_name, width = 2200, height = 2200)
    par(mfrow=c(2,2),oma=c(1.5,1.5,3,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
+
    for (qq in 1:length(vec_q)) {
-      #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q,weights=vec_CI_w)
-      lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
-      #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year + ONI_minmax,data=df_Q)
+      if ( lab_reg == "PDO" ) {
+         #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q,weights=vec_CI_w)
+         lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year + PDO_mean,data=df_Q)
+      } else if ( lab_reg == "NAO" ) {
+         lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year + NAO_mean,data=df_Q)
+      } else {
+         lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
+      }
       sum_lm_Q <- summary(lm_Q)
       print(summary(lm_Q))
-
+# Plot data, error bars and trend.
       plot(df_Q[,c(1,(qq+1))],ylim=c(0,7),cex.main=3.0,cex.lab=3.0,cex.axis=3.0,lwd=3.0)
       arrows(df_Q$year, array_q_CI[,1,qq], df_Q$year, array_q_CI[,2,qq], length=0.05, angle=90, code=3, lwd=2)
       abline(lm_Q,lwd=3)
+# Plot index.
+      if ( lab_reg == "PDO" ) {
+         par(new=TRUE)
+         plot(df_Q$year,df_Q$PDO_mean,ylim=c(-4,4),xlab="",ylab="",axes=FALSE)
+         lines(df_Q$year,df_Q$PDO_mean)
+      } else {
+         par(new=TRUE)
+         plot(df_Q$year,df_Q$NAO_mean,ylim=c(-4,4),xlab="",ylab="",axes=FALSE)
+         lines(df_Q$year,df_Q$NAO_mean)
+      }
 
       if ( sum_lm_Q$coefficients[2,4] < 0.1 ) {
          trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nSignificant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")

@@ -7,7 +7,6 @@
    #.comm.size <- 4; .comm.rank <- 3
    library(ncdf4)
    library(abind)
-   library(extRemes)
    source("/home/ben/research/NOC/SRS_wave_analysis/analysis/functions/quantile_CI.R")
 # MPI.
    library(pbdMPI, quietly = TRUE)
@@ -39,6 +38,7 @@
    #anal_years <- min(mat_valid_dates[,mission_idx]):max(mat_valid_dates[,mission_idx])
    anal_years <- 2010:2018
    anal_years <- 1992:2018
+   anal_years <- 1993:2000
    lab_years <- paste(anal_years[c(1,length(anal_years))],collapse='-')
 
 # Flag for regression.
@@ -62,7 +62,7 @@
    mat_lon_grid_idx <- matrix(1:length(lon_range_node),nrow=res)
 
 # Data set (mission) selection.
-   mission_idx <- c(2:9)
+   mission_idx <- c(2:5)
 
 # Months for analysis.
    flag_annual <- TRUE

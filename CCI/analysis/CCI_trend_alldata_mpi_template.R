@@ -4,9 +4,9 @@
 # BT 04/2019
 
 # Libraries.
+   #.comm.size <- 4; .comm.rank <- 3
    library(ncdf4)
    library(abind)
-   library(extRemes)
 # MPI.
    library(pbdMPI, quietly = TRUE)
    init()
@@ -39,10 +39,7 @@
 
 # Analysis duration.
 # Note for 'flag_winter', first year must be >= 1993.
-   anal_years <- 1992:2000
-   anal_years <- 2010:2018
-   anal_years <- 1992:2018
-   anal_years <- 2001:2009
+   anal_years <- <anal_years>
 
 # Flag for complete winter season.
    flag_winter <- FALSE
@@ -52,7 +49,7 @@
    all_months <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
 # Months for analysis.
-   flag_annual <- TRUE
+   flag_annual <- FALSE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
    #anal_months <- c("07","08","09")
@@ -69,11 +66,12 @@
    }
 
 # Flag for regression.
-   flag_reg <- "ONI"
-   flag_reg <- "PDO"
-   flag_reg <- "NAO"
-   flag_reg <- "AO"
-   flag_reg <- "none"
+   #flag_reg <- "ONI"
+   #flag_reg <- "PDO"
+   #flag_reg <- "NAO"
+   #flag_reg <- "AO"
+   #flag_reg <- "none"
+   flag_reg <- "<flag_reg>"
 
 # Parallelise over the geographic range, by longitude.
 # Parallelise over longitude, divide the range by number of processing cores.
