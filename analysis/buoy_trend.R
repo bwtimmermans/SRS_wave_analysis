@@ -17,10 +17,10 @@
    #IMOS_SRS-Surface-Waves_MW_JASON-1_FV02_052N-205E-DM00.nc
 
 # Buoy 46066, 52.785N 155.047W
-   buoy_list <- c("46066")
+   #buoy_list <- c("46066")
    #buoy_list <- c("51004")
    #buoy_list <- c("41002")
-   #buoy_list <- c("46006")
+   buoy_list <- c("46006")
 
 # Averaging flag.
    #flag_av <- "24hr"
