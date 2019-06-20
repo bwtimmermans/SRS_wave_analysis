@@ -36,9 +36,9 @@
 
 # Analysis duration (typically the coverage of the chosen missions).
    #anal_years <- min(mat_valid_dates[,mission_idx]):max(mat_valid_dates[,mission_idx])
-   anal_years <- 2010:2018
    anal_years <- 1992:2018
    anal_years <- 1993:2000
+   anal_years <- 2010:2018
    lab_years <- paste(anal_years[c(1,length(anal_years))],collapse='-')
 
 # Flag for regression.
@@ -62,16 +62,16 @@
    mat_lon_grid_idx <- matrix(1:length(lon_range_node),nrow=res)
 
 # Data set (mission) selection.
-   mission_idx <- c(2:5)
+   mission_idx <- c(6:10)
 
 # Months for analysis.
-   flag_annual <- TRUE
+   flag_annual <- FALSE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
    #anal_months <- c("07","08","09")
    #anal_months <- c("10","11","12")
-   anal_months <- c("01","02","11","12")
-   #anal_months <- c("01","02","03","10","11","12")
+   #anal_months <- c("01","02","11","12")
+   anal_months <- c("01","02","03","10","11","12")
    #anal_months <- c("04","05","06","07","08","09")
    #anal_months <- c("01","02","03","04","05","06")
    #anal_months <- c("07","08","09","10","11","12")
