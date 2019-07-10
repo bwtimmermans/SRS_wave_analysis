@@ -39,6 +39,7 @@
    anal_years <- 1992:2018
    anal_years <- 1993:2000
    anal_years <- 2010:2018
+   anal_years <- 2001:2009
    lab_years <- paste(anal_years[c(1,length(anal_years))],collapse='-')
 
 # Flag for regression.
@@ -62,10 +63,13 @@
    mat_lon_grid_idx <- matrix(1:length(lon_range_node),nrow=res)
 
 # Data set (mission) selection.
-   mission_idx <- c(6:10)
+# 2001-2009
+   mission_idx <- 3:8
+# 2010-2018
+   mission_idx <- 6:10
 
 # Months for analysis.
-   flag_annual <- FALSE
+   flag_annual <- TRUE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
    #anal_months <- c("07","08","09")
@@ -155,7 +159,7 @@
 # Data structures.
    mat_list_annual_KU <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    mat_list_annual_trend_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
-   vec_q <- c(0.5,0.9,0.95)
+   vec_q <- c(0.5,0.9,0.95,0.99)
 
 # Loop over cells by resolution.
    for (lon_res_idx in 1:dim(mat_lon_grid_idx)[2]) {
@@ -225,12 +229,12 @@
             for (y_idx in 1:length(anal_years)) {
                temp_annual_hs <- unlist(mat_annual_hs[y_idx,])
 # Do quantiles.
-               array_annual_stats[y_idx,1:3,2] <- quantile(temp_annual_hs,probs=vec_q)
+               array_annual_stats[y_idx,1:length(vec_q),2] <- quantile(temp_annual_hs,probs=vec_q)
 # Do mean / variance.
-               array_annual_stats[y_idx,4,2] <- mean(temp_annual_hs)
-               array_annual_stats[y_idx,4,c(1,3)] <- array_annual_stats[y_idx,4,2] + c(-var(temp_annual_hs),var(temp_annual_hs))
+               array_annual_stats[y_idx,(length(vec_q)+1),2] <- mean(temp_annual_hs)
+               array_annual_stats[y_idx,(length(vec_q)+1),c(1,3)] <- array_annual_stats[y_idx,(length(vec_q)+1),2] + c(-var(temp_annual_hs),var(temp_annual_hs))
 # Do CIs.
-               array_annual_stats[y_idx,1:3,c(1,3)] <- t(sapply(X=vec_q,FUN=function(x) { sort(temp_annual_hs)[quantile.CI(length(temp_annual_hs),q=x)$Interval] }))
+               array_annual_stats[y_idx,1:length(vec_q),c(1,3)] <- t(sapply(X=vec_q,FUN=function(x) { sort(temp_annual_hs)[quantile.CI(length(temp_annual_hs),q=x)$Interval] }))
             }
 # Trend (linear regression).
             mat_b_q <- array_annual_stats[,,2]

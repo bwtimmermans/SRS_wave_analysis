@@ -20,7 +20,7 @@
          abline(v=sort(AA)[quantile.CI(n=n,q=q)$Interval],lwd=5,lty=3,col="red") }
       }
 
-   png(filename = "./t-dist_samples.png", width = 2400, height = 3000)
+   png(filename = "./t-dist_samples1.png", width = 2400, height = 3000)
    func_plot_qq_CI(1000,0.99)
    dev.off()
 
