@@ -4,9 +4,9 @@
 # BT 04/2019
 
 # Libraries.
+   #.comm.size <- 4; .comm.rank <- 3
    library(ncdf4)
    library(abind)
-   library(extRemes)
 # MPI.
    library(pbdMPI, quietly = TRUE)
    init()
@@ -17,9 +17,6 @@
 # Edit here
 # ----------------------------------------------------------------- #
 
-# Data tpye (KU-all, KU-pass, CU etc).
-   data_type <- "KU"
-
 # Specify domain.
    lon_range <- 0:359
    #lon_range <- 210:219
@@ -29,7 +26,8 @@
    lat_mid <- lat_range + 0.5
 
 # Actual domain.
-   nc1 = nc_open("/backup/datasets/CCI/ESACCI-SEASTATE-L4-SWH-MULTI_1M-201001-fv01.nc")
+   #nc1 = nc_open("/backup/datasets/CCI/ESACCI-SEASTATE-L4-SWH-MULTI_1M-201001-fv01.nc")
+   nc1 = nc_open("../datasets/L4/ESACCI-SEASTATE-L4-SWH-MULTI_1M-201001-fv01.nc")
    vec_lon <- ncvar_get(nc1,"lon")
    vec_lat <- ncvar_get(nc1,"lat")
    nc_close(nc1)
@@ -41,8 +39,8 @@
 # Note for 'flag_winter', first year must be >= 1993.
    anal_years <- 1992:2000
    anal_years <- 2010:2018
-   anal_years <- 1992:2018
    anal_years <- 2001:2009
+   anal_years <- 1992:2018
 
 # Flag for complete winter season.
    flag_winter <- FALSE
@@ -87,7 +85,7 @@
 
    lon_range_node <- lon_range[lon.start.idx:(lon.start.idx + lon.dim.node - 1)]
    lon.start.idx.nc <- which(vec_lon == (lon_range_node - 179.5)[1])
-   print(paste("lon_range_node:",lon_range_node))
+   print(paste("lon_range_node:",paste(lon_range_node,collapse=',')))
 
 # Latitude.
    lat.start.idx <- which(vec_lat == lat_mid[1])
@@ -103,7 +101,8 @@
 # Specify data files and load all data (only summary statistics, so do all in one).
 
 # Data path.
-   data_path <- "/backup/datasets/CCI/"
+   #data_path <- "/backup/datasets/CCI/"
+   data_path <- "../datasets/L4/"
 
 # File base name.
    mat_filenames <- matrix(NA,nrow=length(anal_years),ncol=12)
@@ -224,7 +223,7 @@
 
 # ================================================================= #
 # Data structures.
-   mat_list_annual_KU <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
+   mat_list_annual_stats_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    mat_list_annual_trend_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    vec_q <- c(0.5,0.9,0.95)
 
@@ -297,15 +296,19 @@
          }
          df_stats <- as.data.frame(mat_stats_temp)
          colnames(df_stats) <- c("swh_counts","swh_mean","swh_squared_sum","swh_var")
-         #rownames(df_stats) <- anal_years
+         rownames(df_stats) <- anal_years
 
 # Trend (linear regression).
          df_Q <- data.frame(cbind(year=anal_years,df_stats,mat_ONI[ONI_years,],mat_NAO[NAO_years,],mat_PDO[PDO_years,],mat_AO[AO_years,]))
 
-         mat_trend <- matrix(NA,nrow=length(vec_q),ncol=2)
+         mat_trend <- matrix(NA,nrow=length(vec_q),ncol=6)
          for (qq in 1:1) {
 # Catch if lack of data for regression.
             if (all(!is.nan(df_Q[,(qq+2)]))) {
+# Mean and var.
+               mat_trend[qq,5] <- mean(df_Q[,(qq+2)])
+               mat_trend[qq,6] <- var(df_Q[,(qq+2)])
+# Trend.
                if (flag_reg == "NAO") {
                   lm_Q <- lm(df_Q[,(qq+2)] ~ year + NAO_mean,data=df_Q)
                } else if (flag_reg == "ONI") {
@@ -319,45 +322,52 @@
                   #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
                }
                sum_lm_Q <- summary(lm_Q)
-               mat_trend[qq,] <- c(sum_lm_Q$coefficients[2,1],sum_lm_Q$coefficients[2,4])
+               mat_trend[qq,1:4] <- c(sum_lm_Q$coefficients[2,1],sum_lm_Q$coefficients[2,4],sum_lm_Q$coefficients[2,2],sum_lm_Q$sigma)
             }
          }
-         colnames(mat_trend) <- c("year_slope","Pr(>|t|)")
+         colnames(mat_trend) <- c("trend_coef","Pr(>|t|)","trend_SE","reg_SE","mean","var")
          if (!all(is.na(mat_trend))) {
 # Store for writing.
-            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- df_stats
+            mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- df_stats
             mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- mat_trend
          } else{
-            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
+            mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- NA
             mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA
          }
          } else{
-            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
+            mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- NA
             mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA
          }
       }
    }
 
-# Row and column names (lon and lat).
-   colnames(mat_list_annual_trend_node) <- (matrix(lon_range_node,nrow=res)[1,] + (res/2))
-   rownames(mat_list_annual_trend_node) <- (matrix(lat_range,nrow=res)[1,] + (res/2))
+## Row and column names (lon and lat).
+#   colnames(mat_list_annual_trend_node) <- (matrix(lon_range_node,nrow=res)[1,] + (res/2))
+#   rownames(mat_list_annual_trend_node) <- (matrix(lat_range,nrow=res)[1,] + (res/2))
 
 # Gather all the output into a single array, along longitude.
    mat_list_annual_trend <- do.call( cbind, allgather( mat_list_annual_trend_node ) )
+   mat_list_annual_stats <- do.call( cbind, allgather( mat_list_annual_stats_node ) )
 
 # Create data structure including metadata.
-   array_meta <- list(dataset_name="CCI L4",band="unknown",
+   array_meta <- list(dataset_name="CCI L4",band="KU",
                       years=lab_years,months=lab_months,year_centre=lab_y_centre,resolution=res,
                       orig_lat_cell=(vec_lat-0.5), orig_lon_cell=(vec_lon-0.5),
                       orig_lat_mid=vec_lat, orig_lon_mid=vec_lon,
-                      lat_cell=matrix(lat_range,nrow=res)[1,],lon_cell=matrix((lon_range-180),nrow=res)[1,],
                       lat_mid=(matrix(lat_range,nrow=res)[1,] + (res/2)),lon_mid=(matrix((lon_range-180),nrow=res)[1,] + (res/2)),
-                      trend_stats="swh_mean",trend=c("slope","P-val"))
+                      trend_stats="swh_mean",trend=c("trend_coef","P-val","trend_SE","reg_SE","mean","var"))
+# Trends.
    list_CCI_trend <- list(array_meta,mat_list_annual_trend)
+# Stats.
+   list_CCI_stats <- list(array_meta,mat_list_annual_stats)
 
 # Write out data.
+# Trends.
    data_file <- paste("./output/",res,"deg/list_trend_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,".Robj",sep="")
    save(list_CCI_trend,file = data_file)
+# Stats.
+   data_file <- paste("./output/",res,"deg/list_stats_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,".Robj",sep="")
+   save(list_CCI_stats,file = data_file)
 
    finalize()
 

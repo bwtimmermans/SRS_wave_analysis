@@ -23,11 +23,11 @@
    buoy_list <- c("46006")
 
 # Averaging flag.
-   #flag_av <- "24hr"
-   flag_av <- "6hr"
+   flag_av <- "24hr"
+   #flag_av <- "6hr"
 
 # Regression covariate.
-   lab_reg <- "NAO"
+   lab_reg <- "none"
 
 #-----------------------------------------------------------------------#
 # Buoy data.
@@ -83,7 +83,7 @@
    seq_years <- start_year:2018
 
 #-----------------------------------------------------------------------#
-# Load index data (ONI, NAO).
+# Load index data (ONI, NAO, PDO).
 #-----------------------------------------------------------------------#
 # ONI.
    df_ONI <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/ONI.csv")
@@ -246,42 +246,56 @@
    fig_file_name <- paste("./figures/buoy_trends/",buoy_name,"_QA_annual_",file_lab_av,"_",lab_reg,".png",sep="")
    #X11()
    png(filename = fig_file_name, width = 2200, height = 2200)
-   par(mfrow=c(2,2),oma=c(1.5,1.5,3,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
+   par(mfrow=c(2,2),oma=c(1.5,1.5,6,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
 
    for (qq in 1:length(vec_q)) {
       if ( lab_reg == "PDO" ) {
          #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q,weights=vec_CI_w)
          lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year + PDO_mean,data=df_Q)
+         top_title <- paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nMultiple regression (Hs ~ year + ",lab_reg,")",sep='')
       } else if ( lab_reg == "NAO" ) {
          lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year + NAO_mean,data=df_Q)
+         top_title <- paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nMultiple regression (Hs ~ year + ",lab_reg,")",sep='')
       } else {
          lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
+         top_title <- paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nLinear regression (Hs ~ year)",sep='')
       }
       sum_lm_Q <- summary(lm_Q)
       print(summary(lm_Q))
 # Plot data, error bars and trend.
       plot(df_Q[,c(1,(qq+1))],ylim=c(0,7),cex.main=3.0,cex.lab=3.0,cex.axis=3.0,lwd=3.0)
       arrows(df_Q$year, array_q_CI[,1,qq], df_Q$year, array_q_CI[,2,qq], length=0.05, angle=90, code=3, lwd=2)
-      abline(lm_Q,lwd=3)
+      abline(lm_Q,col="red",lwd=5)
+# Legend.
+      if ( lab_reg == "PDO" ) {
+         legend(x=2004,y=4.2,legend=c("Reg. line","PDO","ONI"),lty=c(1,1,1),lwd=c(5,4,4),,col=c("red","darkblue","darkorange"),cex=3)
+      } else {
+         legend(x=2004,y=4.2,legend=c("Reg. line"),lty=c(1),lwd=c(5),,col=c("red"),cex=3)
+      }
 # Plot index.
       if ( lab_reg == "PDO" ) {
          par(new=TRUE)
-         plot(df_Q$year,df_Q$PDO_mean,ylim=c(-4,4),xlab="",ylab="",axes=FALSE)
-         lines(df_Q$year,df_Q$PDO_mean)
-      } else {
+         plot(df_Q$year,df_Q$PDO_mean,ylim=c(-2,9),xlab="",ylab="",col="darkblue",axes=FALSE)
+	 axis(side=4,at=c(-2:2),cex.axis=2.0)
+         lines(df_Q$year,df_Q$PDO_mean,col="darkblue",lwd=4)
          par(new=TRUE)
-         plot(df_Q$year,df_Q$NAO_mean,ylim=c(-4,4),xlab="",ylab="",axes=FALSE)
-         lines(df_Q$year,df_Q$NAO_mean)
+         plot(df_Q$year,df_Q$ONI_mean,ylim=c(-2,9),xlab="",ylab="",col="darkorange",axes=FALSE)
+         lines(df_Q$year,df_Q$ONI_mean,col="darkorange",lwd=4)
+      #} else {
+      #   par(new=TRUE)
+      #   plot(df_Q$year,df_Q$NAO_mean,ylim=c(-4,4),xlab="",ylab="",axes=FALSE)
+      #   lines(df_Q$year,df_Q$NAO_mean)
       }
 
       if ( sum_lm_Q$coefficients[2,4] < 0.1 ) {
-         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nSignificant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")
+         trend_sig <- paste("Year (trend) coef.: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nSignificant at 10%, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")
       } else {
-         trend_sig <- paste("Trend: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nNot significant, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")
+         trend_sig <- paste("Year (trend) coef.: ",format(sum_lm_Q$coefficients[2,1],digits=2),"m per year.\nNot significant, Pr(>|t|) = ",format(sum_lm_Q$coefficients[2,4],digits=2),sep="")
       }
       mtext(text = trend_sig, side = 3, line = -8, cex = 3)
    }
-   mtext(text = paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")",sep=''), outer = TRUE, side = 3, line = -2, cex = 4)
+   #mtext(text = paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nMultiple regression (year,",lab_reg,")",sep=''), outer = TRUE, side = 3, line = -3, cex = 3.5)
+   mtext(text = top_title, outer = TRUE, side = 3, line = -3, cex = 3.5)
    dev.off()
    system(paste("okular",fig_file_name,"&> /dev/null &"))
    

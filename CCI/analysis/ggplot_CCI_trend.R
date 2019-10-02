@@ -55,9 +55,7 @@
    lab_stats <- attached_data[[1]]$trend_stats
 
 # Analysis data.
-# 1: Q50
-# 2: Q90
-# 3: Q95
+# 1: mean
    stat_idx <- 1
    list_data <- attached_data[[2]]
 
@@ -102,8 +100,8 @@
       #plot_breaks_lo <- 0.9*min(df_plot$plot_stat,na.rm=T)
       #plot_breaks_hi <- 1.1*max(df_plot$plot_stat,na.rm=T)
       #col_breaks <- seq(plot_breaks_lo,plot_breaks_hi,500)
-      col_lim <- 0.010
-      col_breaks <- seq(-col_lim,col_lim,0.002)
+      col_lim <- 0.014
+      col_breaks <- seq(-col_lim,col_lim,0.004)
       #plot_lims <- c(0.95*min(df_plot$plot_stat,na.rm=T),1.05*max(df_plot$plot_stat,na.rm=T))
       plot_lims <- c(-col_lim,col_lim)
    } else if ( stat_idx == 2 ) {
@@ -132,7 +130,7 @@
 	 #geom_point(size = 1, shape = 15 ) +
          scale_fill_gradientn( colours = seq.plot_cols,
                                 #name = expression("SD(" * hat(chi) * "*)"),
-                                name = paste("Trend (m/year)"),
+                                name = paste("Trend\n(m/year)"),
                                 limits = plot_lims,
                                 breaks=col_breaks,
                                 na.value = "transparent",

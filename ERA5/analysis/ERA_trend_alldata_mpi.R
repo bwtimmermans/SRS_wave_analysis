@@ -22,11 +22,7 @@
 
 # Specify domain.
    lon_range <- c(0,359.5)
-   #lon_range <- 210:219
-   lon_mid <- lon_range + 0.5
    lat_range <- c(-71.5,72)
-   #lat_range <- 0:11
-   lat_mid <- lat_range + 0.5
 
 # Actual domain.
    nc1 = nc_open("/backup/datasets/ERA5/era5_swh_1979-2018.nc")
@@ -35,12 +31,16 @@
    vec_time <- ncvar_get(nc1,"time")
    nc_close(nc1)
 
+# Resolution (1 = 1 degree, 2 = 2 degree, etc).
+   res <- 4
+
+# Mid points for meta data.
+   lon_mid <- matrix((lon_range[1]:lon_range[2]),nrow=res)[1,] + (res/2) - 1/4
+   lat_mid <- rev( matrix(lat_range[1]:lat_range[2],nrow=res)[1,] + (res/2) - 1/4 )
+
 # Find indices for ERA longitude, latitude and time.
    lon_idx_range <- which(lon_range[1] == vec_lon):which(lon_range[2] == vec_lon)
    lat_idx_range <- rev(which(lat_range[1] == vec_lat):which(lat_range[2] == vec_lat))
-
-# Resolution (1 = 1 degree, 2 = 2 degree, etc).
-   res <- 4
 
 # Analysis duration.
 # Note for 'flag_winter', first year must be >= 1993.
@@ -48,6 +48,7 @@
    anal_years <- 2001:2009
    anal_years <- 2010:2018
    anal_years <- 1992:2018
+   anal_years <- 1980:2018
 
    time_idx_range <- c(which(as.numeric(format(as.POSIXct(vec_time*3600, origin = '1900-01-01', tz='GMT'),'%Y')) == anal_years[1])[1]:
                        which(as.numeric(format(as.POSIXct(vec_time*3600, origin = '1900-01-01', tz='GMT'),'%Y')) == anal_years[length(anal_years)])[12])
@@ -168,7 +169,7 @@
 
 # ================================================================= #
 # Data structures.
-   mat_list_annual_KU <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
+   mat_list_annual_stats_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    mat_list_annual_trend_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    vec_q <- c(0.5,0.9,0.95)
 
@@ -241,15 +242,19 @@
             }
             df_stats <- as.data.frame(mat_stats_temp)
             colnames(df_stats) <- c("swh_mean","empty","empty","empty")
-            #rownames(df_stats) <- anal_years
+            rownames(df_stats) <- anal_years
 
 # Trend (linear regression).
             df_Q <- data.frame(cbind(year=anal_years,df_stats,mat_ONI[ONI_years,],mat_NAO[NAO_years,]))
 
-            mat_trend <- matrix(NA,nrow=length(vec_q),ncol=2)
+            mat_trend <- matrix(NA,nrow=length(vec_q),ncol=6)
             for (qq in 1:1) {
 # Catch if lack of data for regression.
                if (all(!is.nan(df_Q[,(qq+1)]))) {
+# Mean and var.
+                  mat_trend[qq,5] <- mean(df_Q[,(qq+1)])
+                  mat_trend[qq,6] <- var(df_Q[,(qq+1)])
+# Trend.
                   if (flag_reg == "NAO") {
                      lm_Q <- lm(df_Q[,(qq+1)] ~ year + NAO_mean,data=df_Q)
                   } else if (flag_reg == "ONI") {
@@ -259,45 +264,48 @@
                      #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
                   }
                   sum_lm_Q <- summary(lm_Q)
-                  mat_trend[qq,] <- c(sum_lm_Q$coefficients[2,1],sum_lm_Q$coefficients[2,4])
+                  mat_trend[qq,1:4] <- c(sum_lm_Q$coefficients[2,1],sum_lm_Q$coefficients[2,4],sum_lm_Q$coefficients[2,2],sum_lm_Q$sigma)
                }
             }
-            colnames(mat_trend) <- c("year_slope","Pr(>|t|)")
+            colnames(mat_trend) <- c("year_slope","Pr(>|t|)","trend_SE","reg_SE","mean","var")
             if (!all(is.na(mat_trend))) {
 # Store for writing.
-               mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- df_stats
+               mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- df_stats
                mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- mat_trend
             } else{
-               mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
+               mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- NA
                mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA
             }
          } else{
-            mat_list_annual_KU[[lat_res_idx,lon_res_idx]] <- NA
+            mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- NA
             mat_list_annual_trend_node[[lat_res_idx,lon_res_idx]] <- NA
          }
       }
    }
 
-# Row and column names (lon and lat).
-   #colnames(mat_list_annual_trend_node) <- (matrix(lon_range_node,nrow=res)[1,] + (res/2))
-   #rownames(mat_list_annual_trend_node) <- (matrix(lat_range[1]:lat_range[2],nrow=res)[1,] + (res/2))
-
 # Gather all the output into a single array, along longitude.
    mat_list_annual_trend <- do.call( cbind, allgather( mat_list_annual_trend_node ) )
+   mat_list_annual_stats <- do.call( cbind, allgather( mat_list_annual_stats_node ) )
 
 # Create data structure including metadata.
-   array_meta <- list(dataset_name="ERA5",band="unknown",
+   array_meta <- list(dataset_name="ERA5",band="NA",
                       years=lab_years,months=lab_months,year_centre=lab_y_centre,resolution=res,
-                      orig_lat_cell=(vec_lat-0.5), orig_lon_cell=(vec_lon-0.5),
+                      orig_lat_cell=vec_lat, orig_lon_cell=vec_lon,
                       orig_lat_mid=vec_lat, orig_lon_mid=vec_lon,
-                      lat_cell=matrix(lat_range[1]:lat_range[2],nrow=res)[1,],lon_cell=matrix((lon_range[1]:lon_range[2]-180),nrow=res)[1,],
-                      lat_mid=(matrix(lat_range[1]:lat_range[2],nrow=res)[1,] + (res/2)),lon_mid=(matrix((lon_range[1]:lon_range[2]-180),nrow=res)[1,] + (res/2)),
-                      trend_stats="swh_mean",trend=c("slope","P-val"))
+                      lat_mid=lat_mid,lon_mid=lon_mid,
+                      trend_stats="swh_mean",trend=c("slope","P-val","trend_SE","reg_SE","mean","var"))
+# Trends.
    list_ERA_trend <- list(array_meta,mat_list_annual_trend)
+# Stats.
+   list_ERA_stats <- list(array_meta,mat_list_annual_stats)
 
 # Write out data.
-   data_file <- paste("./output/",res,"deg/list_trend_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,".Robj",sep="")
+# Trend.
+   data_file <- paste("./output/",res,"deg/list_trend_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,"_mean.Robj",sep="")
    save(list_ERA_trend,file = data_file)
+# Stats.
+   data_file <- paste("./output/",res,"deg/list_stats_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,"_mean.Robj",sep="")
+   save(list_ERA_stats,file = data_file)
 
    finalize()
 
