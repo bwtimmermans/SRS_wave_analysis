@@ -32,7 +32,7 @@
    nc_close(nc1)
 
 # Resolution (1 = 1 degree, 2 = 2 degree, etc).
-   res <- 4
+   res <- 2
 
 # Mid points for meta data.
    lon_mid <- matrix((lon_range[1]:lon_range[2]),nrow=res)[1,] + (res/2) - 1/4
@@ -47,8 +47,8 @@
    anal_years <- 1992:2000
    anal_years <- 2001:2009
    anal_years <- 2010:2018
-   anal_years <- 1992:2018
-   anal_years <- 1980:2018
+   anal_years <- 1979:2018
+   anal_years <- 1992:2017
 
    time_idx_range <- c(which(as.numeric(format(as.POSIXct(vec_time*3600, origin = '1900-01-01', tz='GMT'),'%Y')) == anal_years[1])[1]:
                        which(as.numeric(format(as.POSIXct(vec_time*3600, origin = '1900-01-01', tz='GMT'),'%Y')) == anal_years[length(anal_years)])[12])
@@ -61,13 +61,13 @@
    all_months <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
 # Months for analysis.
-   flag_annual <- TRUE
+   flag_annual <- FALSE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
-   #anal_months <- c("07","08","09")
+   anal_months <- c("07","08","09")
    #anal_months <- c("10","11","12")
    #anal_months <- c("01","02","11","12")
-   anal_months <- c("01","02","03","10","11","12")
+   #anal_months <- c("01","02","03","10","11","12")
    #anal_months <- c("04","05","06","07","08","09")
    #anal_months <- c("01","02","03","04","05","06")
    #anal_months <- c("07","08","09","10","11","12")
@@ -94,7 +94,7 @@
 
    lon_range_node <- lon_idx_range[lon.start.idx:(lon.start.idx + lon.dim.node - 1)]
    lon.start.idx.nc <- lon_range_node[1]
-   print(paste("lon_range_node:",lon_range_node))
+   print(paste("lon_range_node:",paste(lon_range_node,collapse=',')))
 
 # Latitude.
    lat.start.idx <- which(vec_lat == lat_range[2])

@@ -7,20 +7,16 @@
    library(ncdf4)
    library(TTR)
    library(abind)
+   require(zyp)
    source("/home/ben/research/NOC/SRS_wave_analysis/analysis/functions/quantile_CI.R")
 
 # ================================================================= #
-# Data path.
-   data_path <- "/home/ben/research/NOC/SRS_wave_analysis/datasets/IMOS/"
-   vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
-   vec_prod <- c(1,2,3,4)
-   vec_prod <- c(1,2,3,4,5,6,7)
-
-for (AA in c("H","L")) {
-   for (BB in c("1hr","24hr")) {
-
-# File base name.
-   #IMOS_SRS-Surface-Waves_MW_JASON-1_FV02_052N-205E-DM00.nc
+# Buoy data specification.
+# ================================================================= #
+# Loops for multiple plots (QC etc).
+#for (AA in c("H","L")) {
+for (AA in c(TRUE,FALSE)) {
+#   for (BB in c("1hr","24hr")) {
 
 # Buoy 46066, 52.785N 155.047W
 # Pacific.
@@ -37,33 +33,48 @@ for (AA in c("H","L")) {
    #buoy_list <- c("41010")
 
 # Averaging flag.
-   #flag_av <- "24hr"
    #flag_av <- "6hr"
    #flag_av <- "1hr"
-   flag_av <- BB
+   #flag_av <- BB
+   flag_av <- "24hr"
 
 # Quality control threshold flag.
 # 85%
    #flag_QC_thresh <- "H"
 # 75%
-   #flag_QC_thresh <- "L"
-   flag_QC_thresh <- AA
-# Title.
+   flag_QC_thresh <- "L"
+   #flag_QC_thresh <- AA
+# Title label and threshold.
    if (flag_QC_thresh == "H") {
-      lab_QC <- "<85% rejection"
+      #lab_QC <- "<85% rejection"
+      lab_QC <- "11/12 mths, 12 days"
+      QC_mth_thresh <- 10
+      QC_day_thresh <- 12
+      QC_hour_thresh <- 12
    } else {
-      lab_QC <- "<75% rejection"
+      #lab_QC <- "<75% rejection"
+      lab_QC <- "10/12 mths, 8 days"
+      QC_mth_thresh <- 9
+      QC_day_thresh <- 8
+      QC_hour_thresh <- 6
    }
 
 # Regression covariate.
    lab_reg <- "none"
 
 # Regression on / off.
+   #flag_buoy <- FALSE
+   flag_buoy <- AA
+
+# Plot buoy monthly averages.
+   flag_buoy_monthly <- flag_buoy
+
+# Regression on / off.
    flag_reg_lines <- TRUE
 
-#-----------------------------------------------------------------------#
+#=======================================================================#
 # Buoy data.
-#-----------------------------------------------------------------------#
+#=======================================================================#
 # Locations.
 # Pacific.
    buoy_46066 <- data.frame(lat=52.785, lon=-155.047, name="46066", nudge=0, lab_x_nudge=1)
@@ -99,7 +110,6 @@ for (AA in c("H","L")) {
 #-----------------------------------------------------------------------#
 
 # Load historical data for NDBC buoys.
-   #array_buoy_obs <- array(0,dim=c(100000,16,length(buoy_list)))
    mat_buoy_obs <- matrix(0,nrow=500000,ncol=16)
    mat_data_dims <- matrix(0,ncol=2,nrow=length(buoy_list))
 # Loop over buoys.
@@ -150,63 +160,32 @@ for (AA in c("H","L")) {
 #-----------------------------------------------------------------------#
 # Gridded data.
 #-----------------------------------------------------------------------#
-
-# Missions.
-   mission_idx <- 6:10
-   mission_idx <- c(3,5:10)
-   mission_idx <- 3:10
-
-# Resolution.
-   res <- 4
-
-# Data type.
-   data_type <- "KU-all"
-
-# Years.
-   lab_years <- "1993-2000"
-   lab_years <- "2001-2009"
-   lab_years <- "2010-2017"
-   lab_years <- "1992-2018"
-
-# Season.
-   lab_months <- "JFMAMJ"
-   lab_months <- "JASOND"
-   lab_months <- "JFMOND"
-   lab_months <- "AMJJAS"
-   lab_months <- "annual"
-
-# Flag for regression.
-   #flag_reg <- "ONI"
-   flag_reg <- "none"
-
-# Flag for year centering (CCI).
-   #lab_y_centre <- "n_winter"
-   lab_y_centre <- "n_summer"
-
-# Read analysis data (amtrix of lists).
+# Labels.
    vec_datasets <- c("GEOSAT","ERS-1","TOPEX","ERS-2","GFO","JASON-1","ENVISAT","JASON-2","CRYOSAT-2","HY-2","SARAL","JASON-3","SENTINEL-3A")
-
-#-----------------------------------------------------------------------#
-   list_names <- list("CCI","SRS","SRS","ERA","NOC","GOW","ERA")
+   list_names <- list("CCI","SRS","ERA","ERA","NOC","GOW")
    list_var_lab <- list("swh_mean","swh_mean","swh_mean","swh_avg","hs_mean","swh_mean")
-   vec_var_col <- c(2,5,5,1,1,1,1)
+   vec_var_col <- c(2,5,1,1,1,1)
 # Adjust longitude iand latitude for comparison with buoy.
-   vec_lon_adjust <- c(0,360,360,360,0,360,360)
-   vec_lat_adjust <- c(0,0,0,0,0,0,0)
+   vec_lon_adjust <- c(0,360,360,360,0,360)
+   vec_lat_adjust <- c(0,0,0,0,0,0)
 
-   list_data_path <- list(7)
+   list_data_path <- list(6)
 # Data path CCI.
-   #list_data_path[[1]] <- paste("/home/ben/research/NOC/SRS_wave_analysis/CCI/analysis/output/",res,"deg/list_stats_",lab_years,"_",lab_months,"_",lab_y_centre,"_",flag_reg,".Robj",sep="")
-   list_data_path[[1]] <- "/home/ben/research/NOC/SRS_wave_analysis/CCI/analysis/output/4deg/list_stats_1992-2018_annual_n_summer_none.Robj"
+   #list_data_path[[1]] <- "/home/ben/research/NOC/SRS_wave_analysis/CCI/analysis/output/4deg/list_stats_1992-2018_annual_n_summer_none.Robj"
+   list_data_path[[1]] <- "/home/ben/research/NOC/SRS_wave_analysis/CCI/analysis/output/1deg/list_stats_1992-2018_annual_n_summer_none.Robj"
 
 # Data path Young [ALL].
    #list_data_path[[2]] <- paste("/home/ben/research/NOC/SRS_wave_analysis/analysis_NOC/output/",res,"deg/list_stats_",data_type,"_",paste(vec_datasets[mission_idx],collapse='_'),"_",lab_years,"_",lab_months,"_global_",flag_reg,".Robj",sep="")
-   list_data_path[[2]] <- "/home/ben/research/NOC/SRS_wave_analysis/analysis_NOC/output/4deg/list_stats_KU-all_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_1992-2017_annual_global_none.Robj"
-# Data path Young [-ERS1].
-   list_data_path[[3]] <- "/home/ben/research/NOC/SRS_wave_analysis/analysis_NOC/output/4deg/list_stats_KU-all_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_1993-2017_annual_global_none.Robj"
+   #list_data_path[[2]] <- "/home/ben/research/NOC/SRS_wave_analysis/analysis_NOC/output/4deg/list_stats_KU-all_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_1992-2017_annual_global_none.Robj"
+   list_data_path[[2]] <- "/home/ben/research/NOC/SRS_wave_analysis/analysis_NOC/output/1deg/list_stats_KU-all_ERS-1_TOPEX_ERS-2_GFO_JASON-1_ENVISAT_JASON-2_CRYOSAT-2_HY-2_1992-2017_annual_global_none.Robj"
 
 # Data path ERA5.
-   list_data_path[[4]] <- "/home/ben/research/NOC/SRS_wave_analysis/ERA5/analysis/output/4deg/list_stats_1980-2018_annual_n_summer_none_mean.Robj"
+   #list_data_path[[3]] <- "/home/ben/research/NOC/SRS_wave_analysis/ERA5/analysis/output/4deg/list_stats_1980-2018_annual_n_summer_none_mean.Robj"
+   list_data_path[[3]] <- "/home/ben/research/NOC/SRS_wave_analysis/ERA5/analysis/output/1deg/list_stats_1979-2018_annual_n_summer_none_mean.Robj"
+
+# Data path ECMWF
+   #list_data_path[[4]] <- "/home/ben/research/NOC/SRS_wave_analysis/ECMWF/output/4deg/list_stats_1979-2017_annual_n_summer_none_mean.Robj"
+   list_data_path[[4]] <- "/home/ben/research/NOC/SRS_wave_analysis/ECMWF/output/1deg/list_stats_1979-2017_annual_n_summer_none_mean.Robj"
 
 # Data path NOC_WW3.
    list_data_path[[5]] <- "/home/ben/research/NOC/SRS_wave_analysis/NOC_WW3/analysis/output/4deg/list_stats_1992-2015_annual_n_summer_none_1deg.Robj"
@@ -214,17 +193,18 @@ for (AA in c("H","L")) {
 # Data path GOW.
    list_data_path[[6]] <- "/home/ben/research/NOC/SRS_wave_analysis/GOW/analysis/output/4deg/list_stats_1990-2018_annual_n_summer_none.Robj"
 
-# Data path ECMWF
-   list_data_path[[7]] <- "/home/ben/research/NOC/SRS_wave_analysis/ECMWF/output/4deg/list_stats_1979-2017_annual_n_summer_none_mean.Robj"
-
 # Labels.
-   plot_labels <- c("(A) CCI [1993-2017]","(B) Young [1992-2017]","(C) Young [-ERS1,1993-2017]","(D) ERA5 [1980-2018]","(E) NOC WW3 [1992-2015]","(F) GOW WW3 [1990-2018]","(G) ECMWF WAM [1979-2017]")
+   plot_labels <- c("(A) CCI [1992-2017]","(B) Young [1992-2017]","(C) ERA5 [1980-2018]","(D) ERA5 WAM (Bidlot) [1979-2017]","(E) NOC WW3 [1992-2015]","(F) GOW WW3 [1990-2018]")
 
 #-----------------------------------------------------------------------#
+# Product selection.
+   vec_prod <- c(1,2,3,4,5,6)
+# CCI, Young, ERA, ECMWF
+   vec_prod <- c(1,2,3,4)
 
 # Data structures.   
-   list_lab_dataset <- list(7)
-   list_buoy_series <- list(7)
+   list_lab_dataset <- list(6)
+   list_buoy_series <- list(6)
 
 # Load data sets in a loop.
    for (d_idx in vec_prod) {
@@ -252,14 +232,10 @@ for (AA in c("H","L")) {
       lat_cell_temp <- abs(lat_mid - eval(parse(text=paste("buoy_",buoy_list[1],"$lat",sep=""))))
       buoy_lat_cell_idx <- which( lat_cell_temp == min(lat_cell_temp) )
       lon_cell_temp <- abs(lon_mid - (eval(parse(text=paste("buoy_",buoy_list[1],"$lon",sep=""))) + vec_lon_adjust[d_idx]))
-      buoy_lon_cell_idx <- which( lon_cell_temp == min(lon_cell_temp) )
+      buoy_lon_cell_idx <- which( lon_cell_temp == min(lon_cell_temp) )[1]
 # Fix for Young.
-      if ( d_idx == 2 | d_idx == 3 ) {
-         #lat_mid <- rev(lat_mid)
-         #lat_cell_temp <- abs(lat_mid - eval(parse(text=paste("buoy_",buoy_list[1],"$lat",sep=""))))
-         #buoy_lat_cell_idx <- which( lat_cell_temp == min(lat_cell_temp) )
+      if ( d_idx == 2 ) {
          series_temp <- list_data[[buoy_lat_cell_idx,buoy_lon_cell_idx]][,,2]
-	 #rownames(series_temp) <- 1993:2017
          list_buoy_series[[d_idx]] <- series_temp
       } else {
 # Extract stats.
@@ -267,9 +243,9 @@ for (AA in c("H","L")) {
       }
    }
 
-#-----------------------------------------------------------------------#
+#=======================================================================#
 # Load index data (ONI, NAO, PDO).
-#-----------------------------------------------------------------------#
+#=======================================================================#
 # ONI.
    df_ONI <- read.csv("/home/ben/research/NOC/SRS_wave_analysis/datasets/indices/ONI.csv")
 # Matrix containing mean, var and "min or max".
@@ -335,139 +311,76 @@ for (AA in c("H","L")) {
 # PDO range based upon 2018.
    PDO_years <- which( as.numeric(rownames(mat_PDO)) == start_year ):which( as.numeric(rownames(mat_PDO)) == 2018 )
 
-#-----------------------------------------------------------------------#
-# Trend based upon annual data.
-#-----------------------------------------------------------------------#
-   list_annual_hs <- list(length(seq_years))
+#=======================================================================#
+# Data processing and QC for buoy data.
+#=======================================================================#
+# Data structures for monthly.
+   mat_monthly_hs <- mat_monthly_hs1 <- matrix(list(),length(seq_years),12)
+# Loop over years to get monthly raw data.
    for (yy in 1:length(seq_years)) {
       if ( seq_years[yy] <= 1998 ) {
-         #hs_temp <- hist_buoy_hs[which(mat_buoy_obs[,1] == (seq_years[yy]-1900))]
-         #list_annual_hs[[yy]] <- hs_temp[!is.na(hs_temp)]
-         list_annual_hs[[yy]] <- hist_buoy_hs[which(mat_buoy_obs[,1] == (seq_years[yy]-1900))]
+         for (mm in 1:12) {
+            #mat_monthly_hs[[yy,mm]] <- hist_buoy_hs[which(mat_buoy_obs[,1] == (seq_years[yy]-1900) & mat_buoy_obs[,2] %in% mm)]
+            month_hs_idx <- which(mat_buoy_obs[,1] == (seq_years[yy]-1900) & mat_buoy_obs[,2] %in% mm)
+            mat_monthly_hs[[yy,mm]] <- cbind( hist_buoy_hs[month_hs_idx],mat_buoy_obs[month_hs_idx,3] )
+	 }
       } else {
-         #hs_temp <- hist_buoy_hs[which(mat_buoy_obs[,1] == seq_years[yy])]
-         #list_annual_hs[[yy]] <- hs_temp[!is.na(hs_temp)]
-         list_annual_hs[[yy]] <- hist_buoy_hs[which(mat_buoy_obs[,1] == seq_years[yy])]
+         for (mm in 1:12) {
+            month_hs_idx <- which(mat_buoy_obs[,1] == seq_years[yy] & mat_buoy_obs[,2] %in% mm)
+            mat_monthly_hs[[yy,mm]] <- cbind( hist_buoy_hs[month_hs_idx],mat_buoy_obs[month_hs_idx,3] )
+	 }
       }
    }
 
-# Take fixed daily mean.
-   #hs_temp_resid <- NULL
+# Data structure for annual.
+   list_annual_hs <- list_annual_hs1 <- list()
+
+# Quality control monthly.
+   mat_month_q_flag <- matrix(TRUE,length(seq_years),12)
+# Quality control annual.
    year_q_flag <- logical(length(seq_years))
    year_q_flag[1:length(seq_years)] <- TRUE
 
-# Averaging.
-# No averaging.
-   if (flag_av == "1hr") {
-      lab_av <- "1 hr mean"
-      mat_day_idx <- cbind(1:8760,1:8760)
-      mat_day_idx_2ph <- cbind(seq(1,17520,2),seq(2,17520,2))
-      mat_day_idx_6ph <- cbind(seq(1,52560,6),seq(7,52561,6))
-
-      if (flag_QC_thresh == "L") {
-         qual_thresh <- 6570
-      } else if (flag_QC_thresh == "H") {
-         qual_thresh <- 7000
-      }
-   } else if (flag_av == "24hr") {
-# 24 hour averaging.
-      lab_av <- "24 hr mean"
-      mat_day_idx <- cbind(seq(1,,24,400),seq(24,,24,400))
-      mat_day_idx_2ph <- cbind(seq(1,,48,2400),seq(24,,48,2400))
-      mat_day_idx_6ph <- cbind(seq(1,,144,2400),seq(144,,144,2400))
-
-      if (flag_QC_thresh == "L") {
-         qual_thresh <- 0.75 * 365
-      } else if (flag_QC_thresh == "H") {
-         qual_thresh <- 0.85 * 365
-      }
-   } else if (flag_av == "6hr") {
-# 6 hour averaging.
-      lab_av <- "6 hr mean"
-      mat_day_idx <- cbind(seq(1,,6,1600),seq(6,,6,1600))
-      mat_day_idx_6ph <- cbind(seq(1,,36,2400),seq(36,,36,2400))
-      if (flag_QC_thresh == "L") {
-         qual_thresh <- 4 * 0.75 * 365
-      } else if (flag_QC_thresh == "H") {
-         qual_thresh <- 4 * 0.85 * 365
-      }
-   }
-
-# Fix for recent years with higher sampling rate.
-# Hourly buoys:
-# 41002
-# 51003
-# 46035
+# Loop over years for quality control.
    for (yy in 1:length(seq_years)) {
-      if (buoy_name == 46006 & seq_years[yy] >= 2016) {
-         hs_temp <- apply(X=mat_day_idx_6ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else if (buoy_name == 41001 & seq_years[yy] >= 2015) {
-         hs_temp <- apply(X=mat_day_idx_6ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else if (buoy_name == 41010 & seq_years[yy] >= 2005 & seq_years[yy] <= 2016) {
-         hs_temp <- apply(X=mat_day_idx_2ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else if (buoy_name == 41010 & seq_years[yy] >= 2017) {
-         hs_temp <- apply(X=mat_day_idx_6ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else if (buoy_name == 42001 & seq_years[yy] >= 2018) {
-         hs_temp <- apply(X=mat_day_idx_6ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else if (buoy_name == 51001 & seq_years[yy] >= 2015) {
-         hs_temp <- apply(X=mat_day_idx_6ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else if (buoy_name == 51004 & seq_years[yy] >= 2018) {
-         hs_temp <- apply(X=mat_day_idx_6ph,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         list_annual_hs[[yy]] <- hs_temp[!is.nan(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
-         }
-      } else {
-         hs_temp <- apply(X=mat_day_idx,MAR=1,FUN=function(x) { mean(list_annual_hs[[yy]][x[1]:x[2]],na.rm=T) })
-         #hs_temp <- list_annual_hs[[yy]]
-         list_annual_hs[[yy]] <- hs_temp[!is.na(hs_temp)]
-         if (length(list_annual_hs[[yy]]) < qual_thresh) {
-            year_q_flag[yy] <- FALSE
+      for (mm in 1:12) {
+         mat_day_hs <- mat_monthly_hs[[yy,mm]]
+         #if ( (sum(!is.na(mat_day_hs[,1])) < 96) | (length(unique(mat_day_hs[,2])) < 13) ) {
+# Require at least 13 days, each containing at least 13 measurements (typically one per hour).
+# Assume equally weighted averages.
+         if ( ! sum( sapply(X=unique(mat_day_hs[,2]),FUN=function(x) { sum(!is.na(mat_day_hs[mat_day_hs[,2]==x,1])) }) > QC_hour_thresh ) > QC_day_thresh ) {
+            mat_month_q_flag[yy,mm] <- FALSE
+         } else {
+            mat_monthly_hs1[[yy,mm]] <- sapply(X=unique(mat_day_hs[,2]),FUN=function(x) { mean(mat_day_hs[mat_day_hs[,2]==x,1],na.rm=T) })
          }
       }
+      #print(paste("Year:",seq_years[yy],"SUM:",sum(unlist(sapply(X=c(1,2,3,10,11,12),FUN=function(x) { mat_month_q_flag[[yy,x]] })))))
+      if ( sum(unlist(sapply(X=1:12,FUN=function(x) { mat_month_q_flag[[yy,x]] }))) < QC_mth_thresh ) {
+         year_q_flag[yy] <- FALSE
+         list_annual_hs[[yy]] <- NA
+         list_annual_hs1[[yy]] <- NA
+      } else {
+# Raw data.
+         hs_temp <- unlist(sapply(X=1:12,FUN=function(x) { mat_monthly_hs[[yy,x]][,1] }))
+         list_annual_hs[[yy]] <- hs_temp[!is.na(hs_temp)]
+# Daily sampling.
+         hs_temp1 <- unlist(sapply(X=1:12,FUN=function(x) { mat_monthly_hs1[[yy,x]] }))
+         list_annual_hs1[[yy]] <- hs_temp1[!is.na(hs_temp1)]
+      }
    }
+   list_annual_hs <- list_annual_hs1
 
-## Take moving daily average.
-#   for (yy in 1:length(seq_years)) {
-#      if ( length(list_annual_hs[[yy]]) > 100 ) {
-#         hs_temp <- SMA(x=list_annual_hs[[yy]],n=48)
-#         list_annual_hs[[yy]] <- hs_temp[!is.na(hs_temp)]
-#      } else {
-#         list_annual_hs[[yy]] <- NA
-#      }
-#   }
-
+#=======================================================================#
+# Annual / seasonal data for data buoy.
+#=======================================================================#
 # Find mean, quantiles and uncertainty.
    vec_q <- c(0.5,0.9,0.95)
    mat_b_mean <- sapply(X=list_annual_hs,FUN=mean,na.rm=T)
    mat_b_mean[is.nan(mat_b_mean)] <- NA
    mat_b_q <- cbind(t(sapply(X=list_annual_hs,FUN=quantile,probs=vec_q,na.rm=T)),mat_b_mean)
    colnames(mat_b_q) <- c(paste("Q",100*c(0.5,0.9,0.95),sep=""),"mean")
-   df_Q_temp <- data.frame(cbind(year=seq_years,mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,],mat_PDO[PDO_years,]))
+   df_Q_temp <- data.frame(cbind(year=(seq_years+0.5),mat_b_q,mat_ONI[ONI_years,],mat_NAO[NAO_years,],mat_PDO[PDO_years,]))
+   rownames(df_Q_temp) <- seq_years+0.5
    df_Q <- df_Q_temp[year_q_flag,]
 # Estimate CIs.
    array_q_CI_temp <- array(0,dim=c(length(seq_years),2,(length(vec_q)+1)))
@@ -483,19 +396,24 @@ for (AA in c("H","L")) {
    vec_CI_w <- ( max(array_q_CI[,1,qq],na.rm=T)/array_q_CI[,1,qq] + max(array_q_CI[,2,qq],na.rm=T)/array_q_CI[,2,qq] ) / 2
    vec_CI_w[is.na(vec_CI_w)] <- 1
 
+#=======================================================================#
+# Create the figure.
+#=======================================================================#
 # Line colours.
-   #colfunc <- colorRampPalette(c("#440d53","#3b518b","#20908d","#4ec469","#f0f921","#f9973f","#ca467a","#8323a7","#0d1687"))
-   #line_cols <- colfunc(6)
-   line_cols <- c("magenta4","orangered2","gold2","springgreen3","green4","cornflowerblue","blue4","")
+   line_cols <- c("orangered2","magenta4","gold2","green4","springgreen3","cornflowerblue","blue4","")
 
 # File generation.
+   lab_av <- "24 hr mean"
    file_lab_av <- paste(strsplit(lab_av,split=' ')[[1]][1:2],collapse='')
-   fig_file_name <- paste("./figures/buoy_trends/",buoy_name,"_QA_annual_",file_lab_av,"_",lab_reg,"_",flag_QC_thresh,"_",paste(vec_prod,collapse=''),".png",sep="")
+   if ( flag_buoy ) { file_lab_prod <- paste("B",paste(vec_prod,collapse=''),sep='') } else { file_lab_prod <- paste(vec_prod,collapse='') }
+   fig_file_name <- paste("./figures/buoy_trends/melbourne/",buoy_name,"_QA_annual_",file_lab_av,"_",lab_reg,"_",flag_QC_thresh,"_",file_lab_prod,".png",sep="")
    #X11()
    png(filename = fig_file_name, width = 3200, height = 1800)
    par(mfrow=c(1,1),oma=c(1.5,1.5,6,1),mar=c(7.0,7.0,5.0,3),mgp=c(5,2,0))
 
-# Regression.
+#-----------------------------------------------------------------------#
+# Regression (lm & Sen slope).
+#-----------------------------------------------------------------------#
    #for (qq in 1:length(vec_q)) {
    for (qq in 4) {
       if ( lab_reg == "PDO" ) {
@@ -507,58 +425,159 @@ for (AA in c("H","L")) {
          top_title <- paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nMultiple regression (Hs ~ year + ",lab_reg,")",sep='')
       } else {
          lm_B <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
-# Young & ERA regression.
+         #sen_B <- zyp.sen(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
+         sen_B <- zyp.sen(mean ~ year,data=df_Q)
+# CCI regression.
+         mat_grid <- list_buoy_series[[1]]
+         mat_grid_plot <- data.frame(year=(as.numeric(rownames(mat_grid))+0.5),mean=mat_grid[,vec_var_col[1]])
+         lm_C <- lm(mean ~ year,data=mat_grid_plot)
+         sen_C <- zyp.sen(mean ~ year,data=mat_grid_plot)
+# Young.
          mat_grid <- list_buoy_series[[2]]
-         mat_grid_plot <- data.frame(year=as.numeric(rownames(mat_grid)),mean=mat_grid[,vec_var_col[2]])
+         mat_grid_plot <- data.frame(year=(as.numeric(rownames(mat_grid))+0.5),mean=mat_grid[,vec_var_col[2]])
          lm_Y <- lm(mean ~ year,data=mat_grid_plot)
-         mat_grid <- list_buoy_series[[4]]
-         mat_grid_plot <- data.frame(year=as.numeric(rownames(mat_grid)),mean=mat_grid[,vec_var_col[4]])
+         sen_Y <- zyp.sen(mean ~ year,data=mat_grid_plot)
+# ERA5.
+         mat_grid <- list_buoy_series[[3]]
+         mat_grid_plot <- data.frame(year=(as.numeric(rownames(mat_grid))+0.5),mean=mat_grid[,vec_var_col[3]])
          lm_E <- lm(mean ~ year,data=mat_grid_plot)
+         sen_E <- zyp.sen(mean ~ year,data=mat_grid_plot)
+# ERA5 [1995 - 2005].
+         mat_grid <- list_buoy_series[[3]]
+         mat_grid_plot <- data.frame(year=(as.numeric(rownames(mat_grid))+0.5),mean=mat_grid[,vec_var_col[3]])
+         lm_Es <- lm(mean ~ year,data=mat_grid_plot[14:39,])
+         sen_Es <- zyp.sen(mean ~ year,data=mat_grid_plot[14:39,])
+
          #top_title <- paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nLinear regression (Hs ~ year)",sep='')
-         top_title <- paste("Trend in mean at NDBC",buoy_name," (",lab_av,",",lab_QC,")\nLinear regression (Hs ~ year)",sep='')
+         top_title <- paste("Trend in mean (annual) at NDBC",buoy_name," (",lab_av,", ",lab_QC,")\nSen regression (Hs ~ year)",sep='')
       }
       sum_lm_B <- summary(lm_B)
       print(summary(lm_B))
+#-----------------------------------------------------------------------#
 # Find plot range.
+#-----------------------------------------------------------------------#
       grid_range <- range(df_Q[,(qq+1)])
       for (d_idx in vec_prod) {
          mat_grid <- list_buoy_series[[d_idx]]
-         mat_grid_plot <- cbind(as.numeric(rownames(mat_grid)),mat_grid[,vec_var_col[d_idx]])
-         grid_range[1] <- min(grid_range[1],min(mat_grid_plot[,2]))
-         grid_range[2] <- max(grid_range[2],max(mat_grid_plot[,2]))
+         grid_range[1] <- min(grid_range[1],min(mat_grid[,vec_var_col[d_idx]],na.rm=T),na.rm=T)
+         grid_range[2] <- max(grid_range[2],max(mat_grid[,vec_var_col[d_idx]],na.rm=T),na.rm=T)
       }
       y_lim <- c( floor(grid_range[1]/0.25)*0.25, ceiling(grid_range[2]/0.25)*0.25 )
+      #if (flag_buoy_monthly) {
+      #   y_lim <- y_lim + c(-1.0,1.0)
+      #}
+      y_lim <- c(1.25,3.75)
+#-----------------------------------------------------------------------#
 # Plot buoy and axes.
-      plot(df_Q[,c(1,(qq+1))],xlim=c(1980,2020),ylim=y_lim,cex.main=3.0,cex.lab=3.0,xlab="Year",ylab="Mean (m)",pch=19,cex=4,axes=FALSE)
+#-----------------------------------------------------------------------#
+      mat_buoy_plot <- df_Q[,c(1,(qq+1))]
+      if ( flag_buoy ) {
+         plot(mat_buoy_plot,xlim=c(1980,2020),ylim=y_lim,cex.main=3.0,cex.lab=3.0,xlab="Year",ylab="Mean (m)",pch=19,cex=4,axes=FALSE)
+      } else {
+         plot(NULL,xlim=c(1980,2020),ylim=y_lim,cex.main=3.0,cex.lab=3.0,xlab="Year",ylab="Mean (m)",pch=19,cex=4,axes=FALSE)
+      }
       axis(side=1,at=seq(1980,2020,5),cex.lab=3.0,cex.axis=3.0,)
       axis(side=2,at=seq(0,7.5,0.25),cex.lab=3.0,cex.axis=3.0)
-# Grid lines.
+#-----------------------------------------------------------------------#
+# Plot monthly means.
+#-----------------------------------------------------------------------#
+      if ( flag_buoy_monthly ) {
+         seq_month <- seq(start_year+1/24,2019-1/24,1/12)
+         vec_month_temp <- unlist(suppressWarnings(lapply(X=t(mat_monthly_hs1),FUN=mean,na.rm=T)))
+         ## Regression on raw.
+         #df_month_temp <- data.frame(time=seq(start_year+1/24,2019-1/24,1/12),mean=vec_month_temp)
+         #df_month_temp <- df_month_temp[!is.na(df_month_temp[,2]),]
+         #sen_mth1 <- zyp.sen(mean ~ time,data=df_month_temp)
+         #lines(cbind(sen_mth1$x,(sen_mth1$coefficients[2]*sen_mth1$x+sen_mth1$coefficients[1])),lty=2,lwd=10,col="red")
+         ## Regression on QC.
+         vec_month_temp[!t(mat_month_q_flag)] <- NA
+         #df_month_temp <- data.frame(time=seq(start_year+1/24,2019-1/24,1/12),mean=vec_month_temp)
+         #df_month_temp <- df_month_temp[!is.na(df_month_temp[,2]),]
+         #sen_mth1 <- zyp.sen(mean ~ time,data=df_month_temp)
+         #lines(cbind(sen_mth1$x,(sen_mth1$coefficients[2]*sen_mth1$x+sen_mth1$coefficients[1])),lty=3,lwd=10,col="blue")
+	 # Trace.
+         points(cbind(seq_month,vec_month_temp),pch=19,cex=2,col="grey30")
+         lines(cbind(seq_month,vec_month_temp),lwd=2,col="grey30")
+      }
+#-----------------------------------------------------------------------#
+# Plot background grid lines.
+#-----------------------------------------------------------------------#
       abline(v=seq(1980,2020,5),col="darkgrey",lwd=3,lty=3)
       abline(h=seq(0,7.5,0.25),col="darkgrey",lwd=3,lty=3)
+#-----------------------------------------------------------------------#
 # Plot gridded products.
+#-----------------------------------------------------------------------#
       for (d_idx in vec_prod) {
          mat_grid <- list_buoy_series[[d_idx]]
-         mat_grid_plot <- cbind(as.numeric(rownames(mat_grid)),mat_grid[,vec_var_col[d_idx]])
- # Plot.
-         points(mat_grid_plot,pch=(d_idx+1),lwd=4,cex=6,col=line_cols[d_idx])
-         lines(mat_grid_plot,lwd=6,col=line_cols[d_idx])
+         mat_grid_plot <- cbind((as.numeric(rownames(mat_grid))+0.5),mat_grid[,vec_var_col[d_idx]])
+         #points(mat_grid_plot,pch=(d_idx+1),lwd=4,cex=6,col=line_cols[d_idx])
+         lines(mat_grid_plot,lwd=9,col=line_cols[d_idx])
       }
 # Buoy lines, uncertainty and trend.
-      lines(df_Q[,c(1,(qq+1))],lwd=6)
+#      buoy_seg_plot <- (mat_buoy_plot[2:dim(mat_buoy_plot)[1],1] - mat_buoy_plot[(1:(dim(mat_buoy_plot)[1])-1),1]) == 1
+#      for (y_idx in 2:dim(mat_buoy_plot)[1]) {
+#         if (buoy_seg_plot[y_idx-1]) {
+#            lines(mat_buoy_plot[c((y_idx-1):y_idx),],lwd=6)
+#         }
+#      }
+
+      #lines(df_Q[,c(1,(qq+1))],lwd=6)
       #arrows(df_Q$year, array_q_CI[,1,qq], df_Q$year, array_q_CI[,2,qq], length=0.05, angle=90, code=3, lwd=2)
-# Trends.
-      if ( flag_reg_lines ) {
-         abline(lm_B,lty=2,lwd=6)
-         abline(lm_Y,col=line_cols[2],lty=2,lwd=6)
-         abline(lm_E,col=line_cols[4],lty=2,lwd=6)
+#-----------------------------------------------------------------------#
+# Plot trends.
+#-----------------------------------------------------------------------#
+      if ( flag_buoy ) {
+# Buoy.
+# Linear trend.
+         newdata <- data.frame(year=as.numeric(names(lm_B$fitted.values)))
+         pred_lm_B <- predict(lm_B,newdata)
+         lines(cbind(newdata,pred_lm_B),lty=5,lwd=6)
+# Sen slope.
+         lines(cbind(sen_B$x,(sen_B$coefficients[2]*sen_B$x+sen_B$coefficients[1])),lty=1,lwd=6)
       }
+      if ( flag_reg_lines ) {
+# Young.
+#         newdata <- data.frame(year=as.numeric(names(lm_Y$fitted.values)))
+#         pred_lm_Y <- predict(lm_Y,newdata)
+#         lines(cbind(newdata,pred_lm_Y),col=line_cols[2],lty=2,lwd=9)
+# Sen slope.
+         lines(cbind(sen_Y$x,(sen_Y$coefficients[2]*sen_Y$x+sen_Y$coefficients[1])),col=line_cols[2],lty=1,lwd=6)
+# ERA5.
+         #newdata <- data.frame(year=lm_E$model$year)
+         #pred_lm_E <- predict(lm_E,newdata)
+         #lines(cbind(newdata,pred_lm_E),col=line_cols[3],lty=1,lwd=6)
+# Sen slope.
+         lines(cbind(sen_E$x,(sen_E$coefficients[2]*sen_E$x+sen_E$coefficients[1])),col=line_cols[3],lty=1,lwd=6)
+# ERA 1995 - 2015.
+#         newdata <- data.frame(year=lm_Es$model$year)
+#         pred_lm_Es <- predict(lm_Es,newdata)
+#         lines(cbind(newdata,pred_lm_Es),col=line_cols[3],lty=2,lwd=9)
+# Sen slope.
+         lines(cbind(sen_E$x,(sen_E$coefficients[2]*sen_E$x+sen_E$coefficients[1])),col="black",lty=1,lwd=6)
+         lines(cbind(sen_E$x,(sen_E$coefficients[2]*sen_E$x+sen_E$coefficients[1])),col=line_cols[3],lty=5,lwd=6)
+         lines(cbind(sen_Es$x,(sen_Es$coefficients[2]*sen_Es$x+sen_Es$coefficients[1])),col="black",lty=1,lwd=6)
+         lines(cbind(sen_Es$x,(sen_Es$coefficients[2]*sen_Es$x+sen_Es$coefficients[1])),col=line_cols[3],lty=5,lwd=6)
+# CCI.
+         #newdata <- data.frame(year=lm_C$model$year)
+         #pred_lm_C <- predict(lm_C,newdata)
+         #lines(cbind(newdata,pred_lm_C),col=line_cols[1],lty=1,lwd=6)
+# Sen slope.
+         lines(cbind(sen_C$x,(sen_C$coefficients[2]*sen_C$x+sen_C$coefficients[1])),col=line_cols[1],lty=1,lwd=6)
+      }
+#-----------------------------------------------------------------------#
 # Legend.
+#-----------------------------------------------------------------------#
       if ( lab_reg == "PDO" ) {
          legend(x=2000,y=3.8,legend=c("Reg. line","PDO","ONI"),lty=c(1,1,1),lwd=c(5,4,4),col=c("red","darkblue","darkorange"),cex=3)
-      } else {
-         legend(x=1980,y=y_lim[2],legend=c("Buoy","Reg. line (buoy)",plot_labels[vec_prod]),lty=c(1,2,1,1,1,1,1,1),lwd=c(5),pch=c(19,NA,(vec_prod+1)),col=c(1,"black",line_cols),cex=3)
+      } else if ( flag_buoy ) {
+         legend(x=1980,y=y_lim[2],legend=c("Buoy","Lin. reg. line (buoy)","Sen reg. line (buoy)",plot_labels[vec_prod]),lty=c(NA,5,1,1,1,1,1,1,2,2,3),lwd=c(5),pch=c(19,rep(NA,10)),col=c("black","black","black",line_cols[vec_prod],line_cols[vec_prod[c(1:3,3)]]),cex=3)
+         #legend(x=1980,y=y_lim[2],legend=c("Buoy","Lin. reg. line (Annual QC)","Sen reg. line (Annual QC)","Sen reg. line (Monthly ALL)","Sen reg. line (Monthly QC)"),lty=c(NA,5,1,2,3),lwd=c(5),pch=c(19,rep(NA,10)),col=c("black","black","black","red","blue"),cex=3)
+      } else if ( !flag_buoy ) {
+         legend(x=1980,y=y_lim[2],legend=c(plot_labels[vec_prod]),lty=c(1,1,1,1,1,1,2,2,3),lwd=c(5),pch=c(rep(NA,10)),col=c(line_cols[vec_prod],line_cols[vec_prod[c(1:3,3)]]),cex=3)
       }
-# Plot index.
+#-----------------------------------------------------------------------#
+# Plot index for multiple regression.
+#-----------------------------------------------------------------------#
       if ( lab_reg == "PDO" ) {
          par(new=TRUE)
          plot(df_Q$year,df_Q$PDO_mean,ylim=c(-2,9),xlab="",ylab="",col="darkblue",axes=FALSE)
@@ -573,17 +592,20 @@ for (AA in c("H","L")) {
       #   lines(df_Q$year,df_Q$NAO_mean)
       }
 
-      if ( sum_lm_B$coefficients[2,4] < 0.1 ) {
-         trend_sig <- paste("Buoy data, year (trend) coef.: ",format(sum_lm_B$coefficients[2,1],digits=2),"m per year.\nSignificant at 10%, Pr(>|t|) = ",format(sum_lm_B$coefficients[2,4],digits=2),sep="")
-      } else {
-         trend_sig <- paste("Buoy data, year (trend) coef.: ",format(sum_lm_B$coefficients[2,1],digits=2),"m per year.\nNot significant, Pr(>|t|) = ",format(sum_lm_B$coefficients[2,4],digits=2),sep="")
+      if ( flag_buoy ) {
+         if ( sum_lm_B$coefficients[2,4] < 0.1 ) {
+            trend_sig <- paste("Buoy data, year (trend) coef.: ",format(sum_lm_B$coefficients[2,1],digits=2),"m per year.\nSignificant at 10%, Pr(>|t|) = ",format(sum_lm_B$coefficients[2,4],digits=2),sep="")
+         } else {
+            trend_sig <- paste("Buoy data, year (trend) coef.: ",format(sum_lm_B$coefficients[2,1],digits=2),"m per year.\nNot significant, Pr(>|t|) = ",format(sum_lm_B$coefficients[2,4],digits=2),sep="")
+         }
+         mtext(text = trend_sig, side = 3, line = -8, cex = 3)
       }
-      mtext(text = trend_sig, side = 3, line = -8, cex = 3)
    }
    #mtext(text = paste("Trend in Q50, Q90, Q95 at NDBC",buoy_name," (",lab_av,")\nMultiple regression (year,",lab_reg,")",sep=''), outer = TRUE, side = 3, line = -3, cex = 3.5)
    mtext(text = top_title, outer = TRUE, side = 3, line = -3, cex = 3.5)
    dev.off()
-   }
+
+   system(paste("okular",fig_file_name,"&> /dev/null &"))
+#   }
 }
-   #system(paste("okular",fig_file_name,"&> /dev/null &"))
    

@@ -7,6 +7,7 @@
    #.comm.size <- 4; .comm.rank <- 3
    library(ncdf4)
    library(abind)
+   require(zyp,quietly = TRUE)
 # MPI.
    library(pbdMPI, quietly = TRUE)
    init()
@@ -33,14 +34,14 @@
    nc_close(nc1)
 
 # Resolution (1 = 1 degree, 2 = 2 degree, etc).
-   res <- 4
+   res <- 1
 
 # Analysis duration.
 # Note for 'flag_winter', first year must be >= 1993.
    anal_years <- 1992:2000
-   anal_years <- 2010:2018
    anal_years <- 2001:2009
-   anal_years <- 1992:2018
+   anal_years <- 2009:2017
+   anal_years <- 1992:2017
 
 # Flag for complete winter season.
    flag_winter <- FALSE
@@ -53,10 +54,10 @@
    flag_annual <- TRUE
    #anal_months <- c("01","02","03")
    #anal_months <- c("04","05","06")
-   #anal_months <- c("07","08","09")
+   anal_months <- c("07","08","09")
    #anal_months <- c("10","11","12")
    #anal_months <- c("01","02","11","12")
-   anal_months <- c("01","02","03","10","11","12")
+   #anal_months <- c("01","02","03","10","11","12")
    #anal_months <- c("04","05","06","07","08","09")
    #anal_months <- c("01","02","03","04","05","06")
    #anal_months <- c("07","08","09","10","11","12")
@@ -69,8 +70,8 @@
 # Flag for regression.
    flag_reg <- "ONI"
    flag_reg <- "PDO"
-   flag_reg <- "NAO"
    flag_reg <- "AO"
+   flag_reg <- "NAO"
    flag_reg <- "none"
 
 # Parallelise over the geographic range, by longitude.
@@ -111,7 +112,7 @@
    }
 
 # Load data.
-   array_CCI <- array(NA,dim=c(length(lon_range_node),length(lat_range),length(anal_years),12,3))
+   array_CCI <- array(NA,dim=c(length(lon_range_node),length(lat_range),length(anal_years),12,5))
    mat_time <- matrix(NA,nrow=length(anal_years),ncol=12)
    for (y_idx in 1:length(anal_years)) {
       for (m_idx in 1:12) {
@@ -120,10 +121,13 @@
 # Statistics.
          array_CCI[,,y_idx,m_idx,1] <- ncvar_get(nc1,"swh_count",start=c(lon.start.idx.nc,lat.start.idx,1), count=c((lon.dim.node),dim.lat,1))
          array_CCI[,,y_idx,m_idx,2] <- ncvar_get(nc1,"swh_mean",start=c(lon.start.idx.nc,lat.start.idx,1), count=c((lon.dim.node),dim.lat,1))
-# Squared sum appears to be average (i.e. sum of squares / n).
+# Var.
+         #array_CCI[,,y_idx,m_idx,3] <- ncvar_get(nc1,"swh_rms",start=c(lon.start.idx.nc,lat.start.idx,1), count=c((lon.dim.node),dim.lat,1))
+# Squared sum is sum of squared values.
          array_CCI[,,y_idx,m_idx,3] <- ncvar_get(nc1,"swh_squared_sum",start=c(lon.start.idx.nc,lat.start.idx,1), count=c(lon.dim.node,dim.lat,1))
-         #array_CCI[,,y_idx,m_idx,4] <- ncvar_get(nc1,"swh_sum")
-         #array_CCI[,,y_idx,m_idx,5] <- ncvar_get(nc1,"swh_rms")
+# Sum.
+         array_CCI[,,y_idx,m_idx,4] <- ncvar_get(nc1,"swh_sum",start=c(lon.start.idx.nc,lat.start.idx,1), count=c(lon.dim.node,dim.lat,1))
+         array_CCI[,,y_idx,m_idx,5] <- ncvar_get(nc1,"swh_rms",start=c(lon.start.idx.nc,lat.start.idx,1), count=c((lon.dim.node),dim.lat,1))
 
          nc_close(nc1)
       }
@@ -226,6 +230,7 @@
    mat_list_annual_stats_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    mat_list_annual_trend_node <- matrix(list(),nrow=dim(mat_lat_grid_idx)[2],ncol=dim(mat_lon_grid_idx)[2])
    vec_q <- c(0.5,0.9,0.95)
+   trend_labs <- c("trend_coef","Pr(>|t|)","trend_SE","reg_SE","mean","var","sen_trend","sen_lo_SE","sen_up_SE")
 
 # Months for continuous winter.
    vec_anal_months <- as.numeric(anal_months)
@@ -238,11 +243,11 @@
       for (lat_res_idx in 1:dim(mat_lat_grid_idx)[2]) {
 # Loop over years.
 # Data structures.
-         mat_stats_temp <- matrix(NA,nrow=length(anal_years),4)
+         mat_stats_temp <- matrix(NA,nrow=length(anal_years),5)
 # Data aggregation.
 # Test for at least 75% observations.
          if ( (sum(!is.na(as.vector(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],1,,2]))) /
-              length(as.vector(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],1,,2]))) > 0.50 ) {
+              length(as.vector(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],1,,2]))) > 0.25 ) {
 # Centre year on winter season.
          if (flag_winter) {
             if (flag_annual) {
@@ -286,31 +291,45 @@
                mat_stats_temp[,1] <- sapply(X=1:length(anal_years),FUN=function(x) { sum(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,,1],na.rm=T) } )
                mat_stats_temp[,2] <- sapply(X=1:length(anal_years),FUN=function(x) { mean(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,,2],na.rm=T) } )
                mat_stats_temp[,3] <- sapply(X=1:length(anal_years),FUN=function(x) { mean(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,,3],na.rm=T) } )
-               mat_stats_temp[,4] <- mat_stats_temp[,3] - mat_stats_temp[,2]^2
+               #mat_stats_temp[,4] <- sapply(X=1:length(anal_years),FUN=function(x) { sum(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,,3],na.rm=T) } )
+               #mat_stats_temp[,5] <- sapply(X=1:length(anal_years),FUN=function(x) { sum(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,,4],na.rm=T) } )
+# Variance.
+               #mat_stats_temp[,3] <- sqrt( (mat_stats_temp[,4] / mat_stats_temp[,1]) - (mat_stats_temp[,5] / mat_stats_temp[,1])^2 )
+               #mat_stats_temp[is.nan(mat_stats_temp[,3]),3] <- NA
             } else {
                mat_stats_temp[,1] <- sapply(X=1:length(anal_years),FUN=function(x) { sum(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,as.numeric(anal_months),1],na.rm=T) } )
                mat_stats_temp[,2] <- sapply(X=1:length(anal_years),FUN=function(x) { mean(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,as.numeric(anal_months),2],na.rm=T) } )
                mat_stats_temp[,3] <- sapply(X=1:length(anal_years),FUN=function(x) { mean(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,as.numeric(anal_months),3],na.rm=T) } )
-               mat_stats_temp[,4] <- mat_stats_temp[,3] - mat_stats_temp[,2]^2
+               #mat_stats_temp[,4] <- sapply(X=1:length(anal_years),FUN=function(x) { sum(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,as.numeric(anal_months),3],na.rm=T) } )
+               #mat_stats_temp[,5] <- sapply(X=1:length(anal_years),FUN=function(x) { sum(array_CCI[mat_lon_grid_idx[,lon_res_idx],mat_lat_grid_idx[,lat_res_idx],x,,4],na.rm=T) } )
+# Variance.
+               #mat_stats_temp[,3] <- sqrt( (mat_stats_temp[,4] / mat_stats_temp[,1]) - (mat_stats_temp[,5] / mat_stats_temp[,1])^2 )
+               #mat_stats_temp[is.nan(mat_stats_temp[,3]),3] <- NA
             }
          }
          df_stats <- as.data.frame(mat_stats_temp)
-         colnames(df_stats) <- c("swh_counts","swh_mean","swh_squared_sum","swh_var")
+
+         #trend_stats <- c("swh_counts","swh_mean","swh_rms","swh_squared_sum","swh_sum")
+         trend_stats <- c("swh_counts","swh_mean","swh_rms")
+         colnames(df_stats) <- trend_stats
          rownames(df_stats) <- anal_years
 
 # Trend (linear regression).
          df_Q <- data.frame(cbind(year=anal_years,df_stats,mat_ONI[ONI_years,],mat_NAO[NAO_years,],mat_PDO[PDO_years,],mat_AO[AO_years,]))
 
-         mat_trend <- matrix(NA,nrow=length(vec_q),ncol=6)
-         for (qq in 1:1) {
+         mat_trend <- matrix(NA,nrow=length(vec_q),ncol=9)
+         for (qq in 1:2) {
 # Catch if lack of data for regression.
-            if (all(!is.nan(df_Q[,(qq+2)]))) {
+            #if (all(!is.nan(df_Q[,(qq+2)]))) {
+            if (! sum(is.nan(df_Q[,(qq+2)])) > 3) {
 # Mean and var.
-               mat_trend[qq,5] <- mean(df_Q[,(qq+2)])
-               mat_trend[qq,6] <- var(df_Q[,(qq+2)])
+               mat_trend[qq,5] <- mean(df_Q[,(qq+2)],na.rm=T)
+               mat_trend[qq,6] <- var(df_Q[,(qq+2)],na.rm=T)
 # Trend.
+               lab_trend_var <- trend_stats[1+qq]
                if (flag_reg == "NAO") {
                   lm_Q <- lm(df_Q[,(qq+2)] ~ year + NAO_mean,data=df_Q)
+                  sen_Q <- eval(parse(text=paste("zyp.sen(",lab_trend_var," ~ year,data=df_Q)",sep='')))
                } else if (flag_reg == "ONI") {
                   lm_Q <- lm(df_Q[,(qq+2)] ~ year + ONI_mean,data=df_Q)
                } else if (flag_reg == "PDO") {
@@ -318,14 +337,17 @@
                } else if (flag_reg == "AO") {
                   lm_Q <- lm(df_Q[,(qq+2)] ~ year + AO_mean,data=df_Q)
                } else {
-                  lm_Q <- lm(df_Q[,(qq+2)] ~ year,data=df_Q)
+                  lm_Q <- eval(parse(text=paste("lm(",lab_trend_var," ~ year,data=df_Q)",sep='')))
+                  sen_Q <- eval(parse(text=paste("zyp.sen(",lab_trend_var," ~ year,data=df_Q)",sep='')))
                   #lm_Q <- lm(eval(parse(text=paste(colnames(mat_b_q)[qq]))) ~ year,data=df_Q)
                }
                sum_lm_Q <- summary(lm_Q)
                mat_trend[qq,1:4] <- c(sum_lm_Q$coefficients[2,1],sum_lm_Q$coefficients[2,4],sum_lm_Q$coefficients[2,2],sum_lm_Q$sigma)
+               #mat_trend[qq,7:9] <- c(sen_Q$coefficients[2],confint.zyp(sen_Q,level=0.6826895)[2,])
+               mat_trend[qq,7:9] <- c(sen_Q$coefficients[2],confint.zyp(sen_Q,level=0.95)[2,])
             }
          }
-         colnames(mat_trend) <- c("trend_coef","Pr(>|t|)","trend_SE","reg_SE","mean","var")
+         colnames(mat_trend) <- trend_labs
          if (!all(is.na(mat_trend))) {
 # Store for writing.
             mat_list_annual_stats_node[[lat_res_idx,lon_res_idx]] <- df_stats
@@ -355,7 +377,7 @@
                       orig_lat_cell=(vec_lat-0.5), orig_lon_cell=(vec_lon-0.5),
                       orig_lat_mid=vec_lat, orig_lon_mid=vec_lon,
                       lat_mid=(matrix(lat_range,nrow=res)[1,] + (res/2)),lon_mid=(matrix((lon_range-180),nrow=res)[1,] + (res/2)),
-                      trend_stats="swh_mean",trend=c("trend_coef","P-val","trend_SE","reg_SE","mean","var"))
+                      trend_stats=trend_stats[2:length(trend_stats)],trend_labs=trend_labs)
 # Trends.
    list_CCI_trend <- list(array_meta,mat_list_annual_trend)
 # Stats.
